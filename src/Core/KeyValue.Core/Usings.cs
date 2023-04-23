@@ -1,1 +1,1 @@
-﻿
+﻿global using Calebs.Extensions;
