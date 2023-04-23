@@ -1,6 +1,6 @@
 namespace Tests.InMemory;
 
-public class UnitTest1
+public class InMemeoryTests
 {
     [Fact]
     public void InMemoryShouldHoldValues()
@@ -15,6 +15,21 @@ public class UnitTest1
         p2.First.Should().Be("Test");
         
     }
+
+    [Fact]
+    public void ShouldReturnVoidForUnknownTypes()
+    {
+        IKeyValueRepo repo = new KeyValueInMemory();
+        var p = repo.Get<Person>("1");
+
+        p.Should().BeNull();
+    }
 }
 
 public record Person (string First, string Last, int Id);
+public class Location
+{
+    public string Id { get; set; }
+    public string Street {get;set;}
+    public string City { get;set;}
+}
