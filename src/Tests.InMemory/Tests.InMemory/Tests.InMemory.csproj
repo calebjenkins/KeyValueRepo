@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\KeyValue.Core\KeyValue.Core.csproj" />
+    <ProjectReference Include="..\..\KeyValueRepo\KeyValueRepo.csproj" />
   </ItemGroup>
 
 </Project>
