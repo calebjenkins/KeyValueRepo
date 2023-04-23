@@ -13,12 +13,33 @@ public class KeyValueInMemory : IKeyValueRepo
         {
             if(_data[typeKey].ContainsKey(key))
             {
-                T data = _data[typeKey][key].FromJson<T>();
+                T? data = _data[typeKey][key].FromJson<T>();
                 return data;
             }
         }
 
         return null;
+    }
+
+    public IList<T> GetAll<T>() where T : class
+    {
+        string typeKey = typeof(T).ToString();
+        List<T> list = new List<T>();
+
+        if (_data.ContainsKey(typeKey))
+        {
+            var keys = _data[typeKey].Keys;
+            foreach (var key in keys)
+            {
+                if (_data[typeKey].ContainsKey(key))
+                {
+                    T? data = _data[typeKey][key].FromJson<T>();
+                    list.Add(data);
+                }
+            }
+        }
+
+        return list;
     }
 
     public void Update<T>(string key, T value) where T : class
