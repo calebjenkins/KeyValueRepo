@@ -1,13 +1,41 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0;</TargetFrameworks>
+		<Configurations>Debug;Release;NET7</Configurations>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Calebs.Data.KeyValueRepo</RootNamespace>
+		<AssemblyName>Calebs.Data.KeyValueRepo</AssemblyName>
+		<Version>1.0.0</Version>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Caleb Jenkins</Authors>
+		<Company>Caleb Jenkins</Company>
+		<Description>a library abstraction for KeyValue data stores.</Description>
+		<Copyright>Copyright Caleb Jenkins</Copyright>
+		<PackageProjectUrl>https://github.com/calebjenkins/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/calebjenkins/KeyValueRepo</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>KeyValue;Data</PackageTags>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageId>Calebs.KeyValueRepo</PackageId>
+		<PackageIconUrl />
+		<Product>Calebs.KeyValueRepo</Product>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Calebs.Extensions" Version="1.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Calebs.Extensions" Version="1.0.0" />
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
 
 </Project>

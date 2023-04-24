@@ -1,4 +1,4 @@
-﻿namespace Calebs.Data.KeyValues;
+﻿namespace Calebs.Data.KeyValueRepo;
 
 public interface IKeyValueRepo
 {
