@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;</TargetFrameworks>
-		<Configurations>Debug;Release;NET7</Configurations>
+		<Configurations>Debug;Release;</Configurations>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Calebs.Data.KeyValueRepo</RootNamespace>
