@@ -34,9 +34,9 @@ The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET S
 ## Methods in IKeyValueRepo
 
 - Get<T>(string Id)
-- Get<T>(int Id)
+- Get<T>(int Id) => Get<T>(string Id)
     - Note: This method has a _default implementation_ that performs a `ToString()` on the Id and calls the `Get<T>(string Id)` method.
 - GetAll<T>()
 - Update<T>(string Id, T object)
-- Update<T>(int Id, T object)
+- Update<T>(int Id, T object) => Update(string Id, T object)
     - Note This method has a _default implementation_ that performs a `ToSTring()` on the int Id and calls the `Update<T>(string Id, T object)` method.
