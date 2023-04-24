@@ -1,10 +1,24 @@
 # KeyValueRepo
-A generic interface for Key Value storage operations. Ideal for simple key-values that might migrate across in memory, SQL Server or NoSQL
+[![.github/workflows/dev-ci.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml/badge.svg?branch=develop)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml)
+[![.github/workflows/main-publish.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml/badge.svg?branch=main)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml)
+[![NuGet](https://img.shields.io/nuget/dt/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo) 
+[![NuGet](https://img.shields.io/nuget/vpre/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo)
+
+A generic interface for Key Value storage operations. Ideal for simple key-values that might migrate across in memory, SQL Server or NoSQL - a quick and easy way to create a KeyValue store.
 
 By default, this library ships with an in-memory implementation. `KeyValueInMemory` which implements the `IKeyValueRepo` interface.
 
-## To Install
-Use nuget package manager
+## Installing KeyValueRepo
+
+You should install [Extensions with NuGet](https://www.nuget.org/packages/Calebs.KeyValueRepo):
+
+    Install-Package Calebs.KeyValueRepo
+    
+Or via the .NET Core command line interface:
+
+    dotnet add package Calebs.KeyValueRepo
+
+Either command, from Package Manager Console or .NET Core CLI, will download and install Calebs.KeyValueRepo and all required dependencies.
 
 ## To Contribute
 PRs should be against the `Develop` branch.
@@ -21,8 +35,8 @@ The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET S
 
 - Get<T>(string Id)
 - Get<T>(int Id)
-    - Note: This method a default implementation that performs a `ToString()` on the Id and calls the `Get<T>(string Id)` method.
+    - Note: This method has a _default implementation_ that performs a `ToString()` on the Id and calls the `Get<T>(string Id)` method.
 - GetAll<T>()
 - Update<T>(string Id, T object)
 - Update<T>(int Id, T object)
-    - Note This method has a default implementation that performs a `ToSTring()` on the int Id and calls the `Update<T>(string Id, T object)` method.
+    - Note This method has a _default implementation_ that performs a `ToSTring()` on the int Id and calls the `Update<T>(string Id, T object)` method.
