@@ -20,12 +20,10 @@ Or via the .NET Core command line interface:
 
 Either command, from Package Manager Console or .NET Core CLI, will download and install Calebs.KeyValueRepo and all required dependencies.
 
-## To Contribute
-PRs should be against the `Develop` branch.
-
-Merged PRs to `Develop` will trigger a `[version]-ci-[buildnumber]` deployment to nuget, assuming all unit tests pass.
-
-Merged PRs to `Main` will trigger a [version] deployment to nuget, assuming all of the tests pass.
+## Contributing
+- PRs should be against the `Develop` branch.
+- Merged PRs to `Develop` will trigger a `[version]-ci-[buildnumber]` deployment to nuget, assuming all unit tests pass.
+- Merged PRs to `Main` will trigger a [version] deployment to nuget, assuming all of the tests pass.
 
 ## Versioning
 The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET SDK style structure. We follow `semantic versioning` for this package.
