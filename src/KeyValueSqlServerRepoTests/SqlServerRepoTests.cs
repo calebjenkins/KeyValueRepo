@@ -1,12 +1,22 @@
-namespace Tests.InMemory;
+using Calebs.Data.KeyValueRepo.SqlServer;
 
-public class InMemeoryTests
+namespace KeyValueSqlServerRepoTests;
+
+public class SqlServerRepoTests
 {
     public virtual IKeyValueRepo GetNewInstanceOfRepoForTests()
     {
-        return new KeyValueInMemory();
+        return new KeyValueSqlServerRepo();
     }
 
+
+    [Fact]
+    public void RepoShouldBuild()
+    {
+        IKeyValueRepo repo = new kvSQL.KeyValueSqlServerRepo();
+        repo.Should().NotBeNull();
+    }
+    
     [Fact]
     public void InMemoryShouldHoldValues()
     {
@@ -23,7 +33,7 @@ public class InMemeoryTests
         repo.Update(p3.Id.ToString(), p3);
 
         var p4 = repo.Get<Person>(1);
-        p4.First.Should().Be("Test2");  
+        p4.First.Should().Be("Test2");
     }
 
     [Fact]
@@ -81,5 +91,5 @@ public class InMemeoryTests
     }
 }
 
-public record Person (string First, string Last, int Id);
-public record Location (string Id, string Street, string City);
+public record Person(string First, string Last, int Id);
+public record Location(string Id, string Street, string City);
