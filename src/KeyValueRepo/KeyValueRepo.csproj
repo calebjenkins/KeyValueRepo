@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;</TargetFrameworks>
-		<Configurations>Debug;Release;</Configurations>
+		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<Configurations>Debug;Release;</Configurations>
 		<RootNamespace>Calebs.Data.KeyValueRepo</RootNamespace>
 		<AssemblyName>Calebs.KeyValueRepo</AssemblyName>
 		<Version>0.1.0</Version>

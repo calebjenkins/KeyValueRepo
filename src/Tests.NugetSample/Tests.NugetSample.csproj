@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Tests.InMemory\Tests.InMemory\InMemeoryTests.cs" Link="InMemeoryTests.cs" />
+    <Compile Include="..\Tests.InMemory\InMemeoryTests.cs" Link="InMemeoryTests.cs" />
   </ItemGroup>
 
   <ItemGroup>

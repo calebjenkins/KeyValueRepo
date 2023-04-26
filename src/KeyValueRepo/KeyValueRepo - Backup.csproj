@@ -1,16 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<Configurations>Debug;Release;</Configurations>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<RootNamespace>Calebs.Data.KeyValueRepo.SqlServer</RootNamespace>
-		<AssemblyName>Calebs.KeyValueSqlServerRepo</AssemblyName>
+		<RootNamespace>Calebs.Data.KeyValueRepo</RootNamespace>
+		<AssemblyName>Calebs.KeyValueRepo</AssemblyName>
 		<Version>0.1.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Caleb Jenkins</Authors>
 		<Company>Caleb Jenkins</Company>
-		<Description>a Sql Server implementation of the KeyValueRepo data store.</Description>
+		<Description>a library abstraction for KeyValue data stores.</Description>
 		<Copyright>Copyright Caleb Jenkins</Copyright>
 		<PackageProjectUrl>https://github.com/calebjenkins/</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/calebjenkins/KeyValueRepo</RepositoryUrl>
@@ -20,15 +21,14 @@
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<PackageId>Calebs.KeyValueSqlServerRepo</PackageId>
+		<PackageId>Calebs.KeyValueRepo</PackageId>
 		<PackageIconUrl />
-		<Product>Calebs.KeyValueSqlServerRepo</Product>
-		<Title>KeyValueSqlServerRepo</Title>
+		<Product>Calebs.KeyValueRepo</Product>
+		<Title>KeyValueRepo</Title>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Calebs.KeyValueRepo" Version="0.1.0" />
-		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+		<PackageReference Include="Calebs.Extensions" Version="1.0.0" />
 		<None Include="..\..\LICENSE">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
