@@ -1,0 +1,46 @@
+on:
+    push:
+        branches:
+            - '!develop'
+            - '!main'
+        paths-ignore:
+            - '**.md'
+    workflow_dispatch:
+
+jobs:
+    build:
+      runs-on: ubuntu-latest
+      timeout-minutes: 15
+  
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+            with:
+                fetch-depth: 0
+          
+          - name: Setup .NET
+            uses: actions/setup-dotnet@v3
+            with:
+                dotnet-version: '7.0.x'
+  
+          - name: Package Restore
+            run: dotnet restore
+  
+          - name: Build
+            run: dotnet build --configuration Release
+  
+          - name: Test
+            run: dotnet test --configuration Release --no-build --filter 'FullyQualifiedName!~BDD_Specs'
+  
+            #- name: Run SpecFlow Tests
+            #  uses: cryptic-wizard/run-specflow-tests@v1.3.1
+            #  with:
+            #     test-assembly-path: src/BDD/BDD_Specs/BDD_Specs/bin/Release/net6.0
+            #     test-assembly-dll: BDD_Specs.dll
+            #     output-html: BDD_SpecResults.html
+            #     no-build: true
+            #     upload-artifact: true
+
+          - name: Echo Branch Name
+            run: echo "Branch name is $GITHUB_REF_NAME "
+            #if: ${{ github.ref == 'refs/heads/main' }}
