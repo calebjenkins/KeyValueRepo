@@ -15,7 +15,7 @@ public class SqlServerTests : InMemoryTests
     {
         _logger = new Mock<ILogger>().Object;
         var filePath = System.IO.Path.GetFullPath("../../../Data/DB.mdf");
-        _connString = $"Server=.\\SQLExpress;AttachDbFilename={filePath};Database=db;Trusted_Connection=Yes;";
+        _connString = $"Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename={filePath};Trusted_Connection=Yes;";
     }
 
     public override IKeyValueRepo GetNewInstanceOfRepoForTests()
