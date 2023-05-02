@@ -9,18 +9,18 @@ namespace Tests.InMemory;
 public class SqlServerTests : InMemoryTests
 {
     ILogger _logger;
-    string _connString = "";
+    KeyValueSqlServerOptions _options = new KeyValueSqlServerOptions();
 
     public SqlServerTests()
     {
         _logger = new Mock<ILogger>().Object;
         var filePath = System.IO.Path.GetFullPath("../../../Data/DB.mdf");
-        _connString = $"Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename={filePath};Trusted_Connection=Yes;";
+        _options.ConnString = $"Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename={filePath};Trusted_Connection=Yes;";
     }
 
     public override IKeyValueRepo GetNewInstanceOfRepoForTests()
     {
-        return new KeyValueSqlServerRepo(_connString, _logger);
+        return new KeyValueSqlServerRepo(_options, _logger);
     }
 
     [Fact]

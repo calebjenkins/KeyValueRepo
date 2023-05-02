@@ -5,14 +5,16 @@ namespace Calebs.Data.KeyValueRepo.SqlServer;
 
 public class KeyValueSqlServerRepo : IKeyValueRepo
 {
+    private readonly KeyValueSqlServerOptions _options;
     private string _connString;
     SqlConnection _conn;
     ILogger _logger; 
 
-    public KeyValueSqlServerRepo(string connString, ILogger logger)
+    public KeyValueSqlServerRepo(KeyValueSqlServerOptions options, ILogger logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _connString = connString ?? throw new ArgumentNullException(nameof(connString));
+        _options = options ?? throw new ArgumentNullException(nameof(options)); 
+        _connString = _options?.ConnString ?? throw new ArgumentNullException("options.ConnString");
 
         _logger.LogDebug("About to open SQL Connection");
         _conn = new SqlConnection(_connString);
