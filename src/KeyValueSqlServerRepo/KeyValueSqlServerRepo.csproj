@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -24,8 +23,8 @@
 		<PackageIconUrl />
 		<Product>Calebs.KeyValueSqlServerRepo</Product>
 		<Title>KeyValueSqlServerRepo</Title>
+		<IsPackable>true</IsPackable>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Calebs.KeyValueRepo" Version="0.1.0" />
 		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
@@ -38,5 +37,4 @@
 			<PackagePath></PackagePath>
 		</None>
 	</ItemGroup>
-
 </Project>

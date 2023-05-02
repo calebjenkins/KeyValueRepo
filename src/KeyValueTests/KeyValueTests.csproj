@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
+	<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +28,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KeyValueRepo\KeyValueRepo.csproj" />
+	  <ProjectReference Include="..\KeyValueSqlServerRepo\KeyValueSqlServerRepo.csproj">
+		  <!--<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+		  <IncludeAssets>Calebs.KeyValueSqlServerRepo.dll</IncludeAssets>
+		  <ExcludeAssets>Calebs.KeyValueRepo.dll</ExcludeAssets>-->
+	  </ProjectReference>
   </ItemGroup>
 
+	<Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+		<ItemGroup>
+			<BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+		</ItemGroup>
+	</Target>
 </Project>
