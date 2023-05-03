@@ -1,17 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using Calebs.Data.KeyValueRepo.SqlServer;
-using Castle.Core.Logging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using Moq;
 
 namespace Tests.InMemory;
 
-public class SqlServerTests : InMemoryTests
+public class SqlServerRepoTests : InMemoryTests
 {
     ILogger _logger;
     KeyValueSqlServerOptions _options = new KeyValueSqlServerOptions();
 
-    public SqlServerTests()
+    public SqlServerRepoTests()
     {
         _logger = new Mock<ILogger>().Object;
         var filePath = System.IO.Path.GetFullPath("../../../Data/DB.mdf");
