@@ -13,7 +13,7 @@ public class InMemoryTests
         IKeyValueRepo repo = GetNewInstanceOfRepoForTests();
         var p = new Person("Test", "Last", 1);
 
-        await repo.Update(p.Id.ToString(), p);
+        repo.Update(p.Id.ToString(), p);
 
         var p2 = await repo.Get<Person>("1");
         p2.Should().NotBeNull();

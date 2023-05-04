@@ -3,7 +3,7 @@
 public class KeyValueInMemory : IKeyValueRepo
 {
     // Note a lot of "await Task.Run(".. etc in here, since this is InMemory, Tasks/Await not really needed, but the interface is designed for networked databases where that is generally preffered. 
-    // Using in Memeory JSON formating (string)
+    // Using in Memory JSON formatting (string)
     Dictionary<string, Dictionary<string, string>> _data = new Dictionary<string, Dictionary<string, string>>();
 
     public async Task<T?> Get<T>(string key) where T : class
