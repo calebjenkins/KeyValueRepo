@@ -2,10 +2,11 @@
 
 public class KeyValueInMemory : IKeyValueRepo
 {
+    // Note a lot of "await Task.Run(".. etc in here, since this is InMemory, Tasks/Await not really needed, but the interface is designed for networked databases where that is generally preffered. 
     // Using in Memeory JSON formating (string)
     Dictionary<string, Dictionary<string, string>> _data = new Dictionary<string, Dictionary<string, string>>();
 
-    public T? Get<T>(string key) where T : class
+    public async Task<T?> Get<T>(string key) where T : class
     {
         string typeKey = typeof(T).ToString();
 
@@ -14,14 +15,14 @@ public class KeyValueInMemory : IKeyValueRepo
             if(_data[typeKey].ContainsKey(key))
             {
                 T? data = _data[typeKey][key].FromJson<T>();
-                return data;
+                return await Task.FromResult<T?>(data);
             }
         }
 
         return null;
     }
 
-    public IList<T> GetAll<T>() where T : class
+    public async Task<IList<T>> GetAll<T>() where T : class
     {
         string typeKey = typeof(T).ToString();
         List<T> list = new List<T>();
@@ -39,10 +40,10 @@ public class KeyValueInMemory : IKeyValueRepo
             }
         }
 
-        return list;
+        return await Task.FromResult<IList<T>>(list);
     }
 
-    public void Update<T>(string key, T value) where T : class
+    public async Task Update<T>(string key, T value) where T : class
     {
         string typeKey = typeof(T).ToString();
 
@@ -52,17 +53,26 @@ public class KeyValueInMemory : IKeyValueRepo
             var newDict = new Dictionary<string, string>();
             newDict.Add(key, value.ToJson());
 
-            _data.Add(typeKey, newDict);
+            await Task.Run(() =>
+            {
+                _data.Add(typeKey, newDict);
+            });
         }
 
         // upsert value - create if does not exist, update if does
         if (!_data[typeKey].ContainsKey(key))
         {
-            _data[typeKey].Add(key, value.ToJson());
+            await Task.Run(() =>
+            {
+                _data[typeKey].Add(key, value.ToJson());
+            });
         }
         else
         {
-            _data[typeKey][key] = value.ToJson();
+            await Task.Run(() =>
+            {
+                _data[typeKey][key] = value.ToJson();
+            });
         }
     }
 }
