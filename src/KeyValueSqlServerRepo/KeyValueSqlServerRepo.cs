@@ -38,17 +38,17 @@ public class KeyValueSqlServerRepo : IKeyValueRepo
         return true;
     }
 
-    public T? Get<T>(string key) where T : class
+    public Task<T?> Get<T>(string key) where T : class
     {
         throw new NotImplementedException();
     }
 
-    public IList<T>? GetAll<T>() where T : class
+    public Task<IList<T>> GetAll<T>() where T : class
     {
         throw new NotImplementedException();
     }
 
-    public void Update<T>(string key, T value) where T : class
+    public Task Update<T>(string key, T value) where T : class
     {
         throw new NotImplementedException();
     }

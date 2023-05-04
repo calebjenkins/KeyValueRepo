@@ -13,7 +13,7 @@ public class InMemoryTests
         IKeyValueRepo repo = GetNewInstanceOfRepoForTests();
         var p = new Person("Test", "Last", 1);
 
-        repo.Update(p.Id.ToString(), p);
+        await repo.Update(p.Id.ToString(), p);
 
         var p2 = await repo.Get<Person>("1");
         p2.Should().NotBeNull();
@@ -30,7 +30,7 @@ public class InMemoryTests
     public async Task ShouldReturnVoidForUnknownTypes()
     {
         IKeyValueRepo repo = GetNewInstanceOfRepoForTests();
-        var p = repo.Get<Person>("1");
+        var p = await repo.Get<Person>("1");
 
         p.Should().BeNull();
     }

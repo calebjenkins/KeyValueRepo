@@ -26,7 +26,7 @@
 		<IsPackable>true</IsPackable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Calebs.KeyValueRepo" Version="0.1.0" />
+		<PackageReference Include="Calebs.KeyValueRepo" Version="0.2.0-ci-3" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
 		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
 		<None Include="..\..\LICENSE">
