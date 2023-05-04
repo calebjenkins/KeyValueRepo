@@ -1,4 +1,4 @@
-namespace Tests.InMemory;
+namespace KeyValueTests;
 
 public class InMemoryTests
 {

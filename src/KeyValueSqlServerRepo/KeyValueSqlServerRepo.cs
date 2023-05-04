@@ -8,14 +8,23 @@ public class KeyValueSqlServerRepo : IKeyValueRepo
     private readonly KeyValueSqlServerOptions _options;
     private string _connString;
     SqlConnection _conn;
-    ILogger _logger; 
+    ILogger<KeyValueSqlServerRepo> _logger; 
 
-    public KeyValueSqlServerRepo(KeyValueSqlServerOptions options, ILogger logger)
+    public KeyValueSqlServerRepo(KeyValueSqlServerOptions options, ILogger<KeyValueSqlServerRepo> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _options = options ?? throw new ArgumentNullException(nameof(options)); 
         _connString = _options?.ConnString ?? throw new ArgumentNullException("options.ConnString");
 
+        if(_options.ValidateDataSchemaOnStart)
+        {
+            var result = validateConnection();
+            _logger.LogInformation("DataSchema Validated");
+        }
+    }
+    private bool validateConnection()
+    {
+        _logger.LogInformation("Validating Connection");
         _logger.LogDebug("About to open SQL Connection");
         _conn = new SqlConnection(_connString);
         _conn.Open();
@@ -25,7 +34,8 @@ public class KeyValueSqlServerRepo : IKeyValueRepo
         _conn.Close();
 
         _logger.LogDebug("SqlConnection is closed");
-        
+
+        return true;
     }
 
     public T? Get<T>(string key) where T : class

@@ -1,6 +1,6 @@
 ﻿using Calebs.Data.KeyValueRepo.SqlServer;
 
-namespace Tests.InMemory;
+namespace KeyValueTests;
 
 public class SqlServerOptionsTests
 {
