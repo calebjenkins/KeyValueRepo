@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Tests.InMemory\Tests.InMemory\InMemeoryTests.cs" Link="InMemeoryTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Calebs.KeyValueRepo" Version="0.1.0" />
     <PackageReference Include="FluentAssertions" Version="6.10.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
