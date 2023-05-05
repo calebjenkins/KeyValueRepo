@@ -7,7 +7,6 @@ public class KeyValueSqlServerRepo : IKeyValueRepo
 {
     private readonly KeyValueSqlServerOptions _options;
     private string _connString;
-    SqlConnection _conn;
     ILogger<KeyValueSqlServerRepo> _logger; 
 
     public KeyValueSqlServerRepo(KeyValueSqlServerOptions options, ILogger<KeyValueSqlServerRepo> logger)
@@ -26,7 +25,7 @@ public class KeyValueSqlServerRepo : IKeyValueRepo
     {
         _logger.LogInformation("Validating Connection");
         _logger.LogDebug("About to open SQL Connection");
-        _conn = new SqlConnection(_connString);
+        var _conn = new SqlConnection(_connString);
         _conn.Open();
 
         _logger.LogDebug("Connection is open");
