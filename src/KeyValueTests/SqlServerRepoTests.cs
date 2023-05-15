@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Calebs.Data.KeyValueRepo.SqlServer;
+using Calebs.Extensions;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using Moq;
 
@@ -21,6 +22,27 @@ public class SqlServerRepoTests : InMemoryTests
     {
         return new KeyValueSqlServerRepo(_options, _logger);
     }
+
+    [Fact]
+    public void CanCreateLocalDbIfMissing()
+    {
+        var connStr = _options.ConnString;
+        string filePath = "";
+        var filePathInConn = KeyValueSqlServerRepo.TryFileNameFromConnectionString(connStr, out filePath);
+        filePathInConn.Should().BeTrue();
+
+        var fileExists = File.Exists(filePath);
+        fileExists.Should().BeFalse();
+
+        KeyValueSqlServerRepo.CreateSqlDatabaseExpressFile(filePath);
+        fileExists = File.Exists(filePath);
+        fileExists.Should().BeTrue();
+
+        var repo = new KeyValueSqlServerRepo(_options, _logger);
+        repo.Should().NotBeNull();
+
+    }
+
 
     [Fact]
     public void CanInitalizeSqlRepoForTests()

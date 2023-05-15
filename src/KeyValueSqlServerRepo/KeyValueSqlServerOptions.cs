@@ -6,6 +6,8 @@ public class KeyValueSqlServerOptions
 {
     [Required]
     public string ConnString { get; set; } = string.Empty;
+    public bool CreateDbIfMissing { get; set; } = false;
+    public string DbFileNameIfMissing { get; set; } = "DB";
     public bool CreateTableIfMissing { get; set; } = true;
     public bool ValidateDataSchemaOnStart { get; set; } = true;
     public string DefaultTableName { get; set; } = "KeyValueRepo";
