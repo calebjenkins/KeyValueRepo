@@ -1,12 +1,17 @@
 ﻿using Calebs.Data.KeyValueRepo.SqlLite;
+using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace KeyValueRepoTests;
 
 public class SqlLiteTests : InMemeoryTests
 {
+    ILogger<KeyValueSqlLiteRepo> _logger = new Moq.Mock<ILogger<KeyValueSqlLiteRepo>>().Object;
+
     public override IKeyValueRepo GetNewRepo()
     {
-        return new KeyValueSqlLiteRepo("Data Source=./../../../_Data/Db.db");
+        var opt = new KeyValueSqlLiteOptions() { ConnectionString= "Data Source=./../../../_Data/Db.db" };
+        return new KeyValueSqlLiteRepo(opt, _logger);
     }
 
     [Fact]
