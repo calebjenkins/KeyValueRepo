@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -28,7 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\KeyValueRepo\KeyValueRepo.csproj" />
+    <ProjectReference Include="..\KeyValueRepo\KeyValueRepo.csproj" />
+    <ProjectReference Include="..\KeyValueSqlLiteRepo\KeyValueSqlLiteRepo.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="_Data\" />
   </ItemGroup>
 
 </Project>

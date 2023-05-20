@@ -1,10 +1,16 @@
-namespace Tests.InMemory;
+namespace KeyValueRepoTests;
 
 public class InMemeoryTests{
+
+    public virtual IKeyValueRepo GetNewRepo()
+    {
+        return new KeyValueInMemory();
+    }
+
     [Fact]
     public async Task InMemoryShouldHoldValues()
     {
-        IKeyValueRepo repo = new KeyValueInMemory();
+        IKeyValueRepo repo = GetNewRepo();
         var p = new Person("Test", "Last", 1);
 
         await repo.Update(p.Id.ToString(), p);
@@ -23,7 +29,7 @@ public class InMemeoryTests{
     [Fact]
     public async Task ShouldReturnVoidForUnknownTypes()
     {
-        IKeyValueRepo repo = new KeyValueInMemory();
+        IKeyValueRepo repo = GetNewRepo();
         var p = await repo.Get<Person>("1");
 
         p.Should().BeNull();
@@ -32,7 +38,7 @@ public class InMemeoryTests{
     [Fact]
     public async Task MissingIdShouldReturnNull()
     {
-        IKeyValueRepo repo = new KeyValueInMemory();
+        IKeyValueRepo repo = GetNewRepo();
         var p1 = new Person("Kelly", "Burkhardt", 1);
         await repo.Update(p1.Id, p1);
 
@@ -46,7 +52,7 @@ public class InMemeoryTests{
     [Fact]
     public async Task GetAllShouldReturnAllInstances()
     {
-        IKeyValueRepo repo = new KeyValueInMemory();
+        IKeyValueRepo repo = GetNewRepo();
         var p1 = new Person("Kelly", "Burkhardt", 1);
         var p2 = new Person("Drew", "Wu", 2);
         var p3 = new Person("Monroe", "", 3);
