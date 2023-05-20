@@ -6,7 +6,7 @@ public class SqlLiteTests : InMemeoryTests
 {
     public override IKeyValueRepo GetNewRepo()
     {
-        return new KeyValueSqlLiteRepo("");
+        return new KeyValueSqlLiteRepo("Data Source=./../../../_Data/Db.db");
     }
 
     [Fact]
@@ -19,9 +19,8 @@ public class SqlLiteTests : InMemeoryTests
     [Fact]
     public async Task ShouldCreateDbInstance()
     {
-        var db = new KeyValueSqlLiteRepo("");
-        var result = await db.ValidateSchema();
+        var db = GetNewRepo();
+        var result = await ((KeyValueSqlLiteRepo) db).ValidateSchema();
         result.Should().BeTrue();
-
     }
 }

@@ -14,9 +14,9 @@ public class KeyValueSqlLiteRepo : IKeyValueRepo
 
     public async Task<bool> ValidateSchema()
     {
+
         await _db.OpenAsync();
         _db.Close();
-
 
         return true;
     }
