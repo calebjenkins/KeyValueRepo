@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
+﻿
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public class KeyValueSqlLiteRepo : IKeyValueRepo
@@ -9,13 +8,16 @@ public class KeyValueSqlLiteRepo : IKeyValueRepo
 
     private Microsoft.Data.Sqlite.SqliteConnection _db;
 
-    public KeyValueSqlLiteRepo(KeyValueSqlLiteOptions Options, ILogger<KeyValueSqlLiteRepo> Logger)
+    public KeyValueSqlLiteRepo(ILogger<KeyValueSqlLiteRepo> Logger, KeyValueSqlLiteOptions Options = null)
     {
         _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
-        _options = Options ?? throw new ArgumentNullException(nameof(Options));
+        _options = Options ?? new KeyValueSqlLiteOptions();
 
         _db = new Microsoft.Data.Sqlite.SqliteConnection(_options.ConnectionString);
     }
+
+    public string DatabaseFileName => Path.GetFullPath(_db.DataSource);
+
 
     public async Task<bool> ValidateSchema()
     {
@@ -39,5 +41,17 @@ public class KeyValueSqlLiteRepo : IKeyValueRepo
     public Task Update<T>(string key, T value) where T : class
     {
         throw new NotImplementedException();
+    }
+}
+
+public static class KeyValueSqlLiteRepoExtensions
+{
+    public static KeyValueSqlLiteRepo asKeyValueSqlLiteRepo(this IKeyValueRepo repo)
+    {
+        if(repo is KeyValueSqlLiteRepo)
+        {
+            return (KeyValueSqlLiteRepo)repo;
+        }
+        return null;
     }
 }

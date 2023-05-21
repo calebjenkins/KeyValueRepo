@@ -1,8 +1,4 @@
-﻿using Calebs.Data.KeyValueRepo.SqlLite;
-using Castle.Core.Logging;
-using Microsoft.Extensions.Logging;
-
-namespace KeyValueRepoTests;
+﻿namespace KeyValueRepoTests;
 
 public class SqlLiteTests : InMemeoryTests
 {
@@ -10,8 +6,8 @@ public class SqlLiteTests : InMemeoryTests
 
     public override IKeyValueRepo GetNewRepo()
     {
-        var opt = new KeyValueSqlLiteOptions() { ConnectionString= "Data Source=./../../../_Data/Db.db" };
-        return new KeyValueSqlLiteRepo(opt, _logger);
+        var opt = new KeyValueSqlLiteOptions() { ConnectionString = "Data Source=./../../../_Data/Db.db" };
+        return new KeyValueSqlLiteRepo(_logger, opt);
     }
 
     [Fact]
@@ -25,7 +21,44 @@ public class SqlLiteTests : InMemeoryTests
     public async Task ShouldCreateDbInstance()
     {
         var db = GetNewRepo();
-        var result = await ((KeyValueSqlLiteRepo) db).ValidateSchema();
+        var result = await db.asKeyValueSqlLiteRepo().ValidateSchema();
         result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void FileNameIsAvailable()
+    {
+        var db = GetNewRepo();
+        var filepath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+        filepath.Should().Contain("_Data\\Db.db");
+    }
+
+    [Fact]
+    public void DefaultFileNameShouldBeProvided()
+    {
+        ILogger<KeyValueSqlLiteRepo> _logger = new Mock<ILogger<KeyValueSqlLiteRepo>>().Object;
+        var db = new KeyValueSqlLiteRepo(_logger);
+        var filePath = db.DatabaseFileName;
+        filePath.Should().Contain("KeyValueDatabase.db");
+    }
+
+    [Fact]
+    public async Task CorrectFileGetsCreated()
+    {
+        var db = GetNewRepo();
+        var filePath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+
+        var exists = File.Exists(filePath);
+        exists.Should().BeTrue();
+
+        File.Delete(filePath);
+        File.Exists(filePath).Should().BeFalse();
+
+        var valid = await db.asKeyValueSqlLiteRepo().ValidateSchema();
+        File.Exists(filePath).Should().BeTrue();
+
+       // Clean Up
+       // File.Delete(filePath);
+       // File.Exists(filePath).Should().BeFalse();
     }
 }

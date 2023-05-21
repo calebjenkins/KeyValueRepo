@@ -1,14 +1,9 @@
-﻿
-using System.ComponentModel.DataAnnotations;
-
-namespace Calebs.Data.KeyValueRepo.SqlLite;
+﻿namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public class KeyValueSqlLiteOptions
 {
-    [Required]
-    public string ConnectionString { get; set; } = string.Empty;
-    public bool CreateDbIfMissing { get; set; } = false;
-    public string DbFileNameIfMissing { get; set; } = "DB";
+    public string ConnectionString { get; set; } = "Data Source=./KeyValueDatabase.db";
+    public bool ValidateSchemaOnStartUp { get; set; } = true;
     public bool CreateTableIfMissing { get; set; } = true;
     public string DefaultTableName { get; set; } = "KeyValueRepo";
     public string ColumnPrefix { get; set; } = string.Empty;
@@ -23,5 +18,4 @@ public class KeyValueSqlLiteOptions
     public string UpdatedOnColumnName { get; set; } = "UpdatedOn";
 
     public Dictionary<string, string> NonDefaultTableMapping { get; set; } = new Dictionary<string, string>();
-
 }
