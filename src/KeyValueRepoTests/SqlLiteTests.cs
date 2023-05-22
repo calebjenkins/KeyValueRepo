@@ -51,14 +51,19 @@ public class SqlLiteTests : InMemeoryTests
         var exists = File.Exists(filePath);
         exists.Should().BeTrue();
 
-        File.Delete(filePath);
-        File.Exists(filePath).Should().BeFalse();
+        if (exists)
+        {
+            await db.asKeyValueSqlLiteRepo().ReleaseForCleanUp();
+            File.Delete(filePath);
+            File.Exists(filePath).Should().BeFalse();
+        }
 
         var valid = await db.asKeyValueSqlLiteRepo().ValidateSchema();
         File.Exists(filePath).Should().BeTrue();
 
-       // Clean Up
-       // File.Delete(filePath);
-       // File.Exists(filePath).Should().BeFalse();
+        // Clean Up
+        // await db.asKeyValueSqlLiteRepo().ReleaseForCleanUp();
+        // File.Delete(filePath);
+        // File.Exists(filePath).Should().BeFalse();
     }
 }
