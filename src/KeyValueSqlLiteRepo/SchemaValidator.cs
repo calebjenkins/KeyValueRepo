@@ -1,15 +1,15 @@
 ﻿
 using Microsoft.Data.Sqlite;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public class SchemaValidator
 {
-    KeyValueSqlLiteOptions _options;
     ILogger<SchemaValidator> _logger;
-    SqliteConnection _db;
 
     public SchemaValidator(ILogger<SchemaValidator> Logger)
     {
@@ -51,10 +51,63 @@ public class SchemaValidator
         }
     }
 
-    public static string createDefaultTableSql(KeyValueSqlLiteOptions opt)
+    public async Task<bool> CreateAllTables(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    {
+        var TotalResult =  await CreateTable(Options.DefaultTableName, Options , DbConnection);
+
+        if (TotalResult)
+        {
+            foreach (var tableName in Options.NonDefaultTableMapping.Values)
+            {
+               var thisResult = await CreateTable(tableName, Options, DbConnection);
+                if(!thisResult)
+                {
+                    TotalResult = thisResult;
+                }
+            }
+        }
+
+        return TotalResult;
+    }
+
+    public async Task<bool> CreateTable(string TableName, KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    {
+        DbConnection.ConfirmOpen();
+
+        var sql = createTableSql(TableName, Options);
+
+        try
+        {
+            using var connection = DbConnection;
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = sql;
+
+            await command.ExecuteNonQueryAsync();
+            return true;
+
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            throw;
+        }
+        catch (DbException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            throw;
+        }
+    }
+    public static string createTableSql(string TableName, KeyValueSqlLiteOptions opt)
     {
         var createTableSql = $@"
-            CREATE TABLE {opt.DefaultTableName} (
+            CREATE TABLE {TableName} (
                     {opt.ColumnPrefix + opt.KeyColumnName} TEXT PRIMARY KEY,
                     {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT PRIMARY KEY,
                     {opt.ColumnPrefix + opt.ValueColumnName} TEXT ";
