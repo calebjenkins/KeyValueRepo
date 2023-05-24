@@ -1,4 +1,8 @@
 ﻿
+using Microsoft.Data.Sqlite;
+using System.Data;
+using System.Diagnostics;
+
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public class SchemaValidator
@@ -12,41 +16,62 @@ public class SchemaValidator
         _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
     }
 
-    public async Task<bool> TablesExists(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    public async Task<bool> TablesExists(string TableName, SqliteConnection DbConnection)
     {
         DbConnection.ConfirmOpen();
-        var defaultTable = Options.DefaultTableName;
+        
+        var sql = $@"SELECT name FROM sqlite_master
+                     WHERE type='table' AND name = $table_name;";
 
-        var createSqlTable = $"";
+        try
+        {
+            using var connection = DbConnection;
+            connection.Open();
 
-        return true;
+            var command = connection.CreateCommand();
+            command.CommandText = sql;
+            command.Parameters.AddWithValue("$table_name", TableName);
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (reader.Read())
+            {
+                var name = reader.GetString(0);
+                Debug.Assert(name == TableName);
+                if (name == TableName)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            throw;
+        }
     }
 
-    public static string checkDefaultTableSql(KeyValueSqlLiteOptions opt)
-    {
-        return "";
-    }
     public static string createDefaultTableSql(KeyValueSqlLiteOptions opt)
     {
-        var createSqlTable = $@"
+        var createTableSql = $@"
             CREATE TABLE {opt.DefaultTableName} (
-                    {opt.KeyColumnName} TEXT PRIMARY KEY,
-                    {opt.TypeValueColumnName} TEXT PRIMARY KEY,
-                    {opt.ValueColumnName} TEXT ";
+                    {opt.ColumnPrefix + opt.KeyColumnName} TEXT PRIMARY KEY,
+                    {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT PRIMARY KEY,
+                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT ";
 
         if (opt.UseAuditFields)
         {
-            createSqlTable += $@"
-                    , {opt.CreateByColumnName} TEXT,
-                    {opt.CreateOnColumnName} INTEGER,
-                    {opt.UpdatedByColumnName} TEXT,
-                    {opt.UpdatedOnColumnName} INTEGER
+            createTableSql += $@"
+                    , {opt.ColumnPrefix + opt.CreateByColumnName} TEXT,
+                    {opt.ColumnPrefix + opt.CreateOnColumnName} INTEGER,
+                    {opt.ColumnPrefix + opt.UpdatedByColumnName} TEXT,
+                    {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER
                 ";
         }
 
-        createSqlTable += $@" ); ";
+        createTableSql += $@" ); ";
 
-        return createSqlTable;
+        return createTableSql;
     }
 
 }
