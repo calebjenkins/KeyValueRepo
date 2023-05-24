@@ -66,4 +66,26 @@ public class SqlLiteTests : InMemeoryTests
         // File.Delete(filePath);
         // File.Exists(filePath).Should().BeFalse();
     }
+
+    [Fact]
+    public async Task ConfirmTableDoesNotExistAndCanBeCreated()
+    {
+        var db = GetNewRepo();
+        var filePath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+
+        var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
+        var defaultTableName = opt.DefaultTableName;
+
+        ILogger<SchemaValidator> _SchemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
+
+        var verify = new SchemaValidator(_SchemaLogger);
+        bool exist = await verify.TablesExists(defaultTableName, db.asKeyValueSqlLiteRepo().DbConn);
+        exist.Should().BeFalse();
+
+        bool tableCreated = await verify.CreateAllTables(opt, db.asKeyValueSqlLiteRepo().DbConn);
+        tableCreated.Should().BeTrue();
+
+        exist = await verify.TablesExists(defaultTableName, db.asKeyValueSqlLiteRepo().DbConn);
+        exist.Should().BeTrue();
+    }
 }

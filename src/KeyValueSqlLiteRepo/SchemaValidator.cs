@@ -106,23 +106,19 @@ public class SchemaValidator
     }
     public static string createTableSql(string TableName, KeyValueSqlLiteOptions opt)
     {
-        var createTableSql = $@"
-            CREATE TABLE {TableName} (
-                    {opt.ColumnPrefix + opt.KeyColumnName} TEXT PRIMARY KEY,
-                    {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT PRIMARY KEY,
-                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT ";
-
-        if (opt.UseAuditFields)
-        {
-            createTableSql += $@"
-                    , {opt.ColumnPrefix + opt.CreateByColumnName} TEXT,
-                    {opt.ColumnPrefix + opt.CreateOnColumnName} INTEGER,
+        var auditColumnsSql = (!opt.UseAuditFields) ? string.Empty : $@",
+                    {opt.ColumnPrefix + opt.CreateByColumnName} TEXT,
+                    {opt.ColumnPrefix + opt.CreateOnColumnName} INTEGER NOT NULL,
                     {opt.ColumnPrefix + opt.UpdatedByColumnName} TEXT,
-                    {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER
-                ";
-        }
+                    {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER NOT NULL ";
 
-        createTableSql += $@" ); ";
+        var createTableSql = $@"
+            CREATE TABLE {TableName} ({opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
+                    {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT NOT NULL,
+                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT { auditColumnsSql }  );";
+                    // Primary Key ({ opt.ColumnPrefix + opt.KeyColumnName }, { opt.ColumnPrefix + opt.TypeValueColumnName }));";
+
+        Debug.Print($"Sql: {createTableSql} ");
 
         return createTableSql;
     }

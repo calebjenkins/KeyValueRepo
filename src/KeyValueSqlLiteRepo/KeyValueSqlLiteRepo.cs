@@ -22,6 +22,8 @@ public class KeyValueSqlLiteRepo : IKeyValueRepo
         }
     }
 
+    public SqliteConnection DbConn { get { return _db; } }
+
     public string DatabaseFileName => Path.GetFullPath(_db.DataSource);
 
 
