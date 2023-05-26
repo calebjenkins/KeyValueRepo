@@ -47,6 +47,9 @@ public class KeyValueSqlLiteRepo : IKeyValueRepo
     {
         await _db.CloseAsync();
         await _db.DisposeAsync();
+        //SqliteConnection.ClearPool(_db);
+        SqliteConnection.ClearAllPools();
+
         GC.Collect();
         GC.WaitForPendingFinalizers();
         return;

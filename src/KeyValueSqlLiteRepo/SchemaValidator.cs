@@ -19,7 +19,7 @@ public class SchemaValidator
     public async Task<bool> TablesExists(string TableName, SqliteConnection DbConnection)
     {
         DbConnection.ConfirmOpen();
-        
+
         var sql = $@"SELECT name FROM sqlite_master
                      WHERE type='table' AND name = $table_name;";
 
@@ -53,14 +53,14 @@ public class SchemaValidator
 
     public async Task<bool> CreateAllTables(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
     {
-        var TotalResult =  await CreateTable(Options.DefaultTableName, Options , DbConnection);
+        var TotalResult = await CreateTable(Options.DefaultTableName, Options, DbConnection);
 
         if (TotalResult)
         {
             foreach (var tableName in Options.NonDefaultTableMapping.Values)
             {
-               var thisResult = await CreateTable(tableName, Options, DbConnection);
-                if(!thisResult)
+                var thisResult = await CreateTable(tableName, Options, DbConnection);
+                if (!thisResult)
                 {
                     TotalResult = thisResult;
                 }
@@ -69,7 +69,6 @@ public class SchemaValidator
 
         return TotalResult;
     }
-
     public async Task<bool> CreateTable(string TableName, KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
     {
         DbConnection.ConfirmOpen();
@@ -104,6 +103,19 @@ public class SchemaValidator
             throw;
         }
     }
+    public async Task<bool> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    {
+        bool result = false;
+        using (var tables = await DbConnection.GetSchemaAsync("Tables"))
+        {
+            foreach (DataRow table in tables.Rows)
+            {
+                var t = (string)table["TABLE_NAME"];
+                result = (t == Options.DefaultTableName);
+            }
+        }
+        return result;
+    }
     public static string createTableSql(string TableName, KeyValueSqlLiteOptions opt)
     {
         var auditColumnsSql = (!opt.UseAuditFields) ? string.Empty : $@",
@@ -113,10 +125,10 @@ public class SchemaValidator
                     {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER NOT NULL ";
 
         var createTableSql = $@"
-            CREATE TABLE {TableName} ({opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
+            CREATE TABLE IF NOT EXISTS {TableName} ({opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
                     {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT NOT NULL,
-                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT { auditColumnsSql }  );";
-                    // Primary Key ({ opt.ColumnPrefix + opt.KeyColumnName }, { opt.ColumnPrefix + opt.TypeValueColumnName }));";
+                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT {auditColumnsSql}  );";
+        // Primary Key ({ opt.ColumnPrefix + opt.KeyColumnName }, { opt.ColumnPrefix + opt.TypeValueColumnName }));";
 
         Debug.Print($"Sql: {createTableSql} ");
 

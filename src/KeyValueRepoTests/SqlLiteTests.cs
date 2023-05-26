@@ -1,4 +1,6 @@
-﻿namespace KeyValueRepoTests;
+﻿using System.Diagnostics;
+
+namespace KeyValueRepoTests;
 
 public class SqlLiteTests : InMemeoryTests
 {
@@ -6,7 +8,7 @@ public class SqlLiteTests : InMemeoryTests
 
     public override IKeyValueRepo GetNewRepo()
     {
-        var opt = new KeyValueSqlLiteOptions() { ConnectionString = "Data Source=./../../../_Data/Db.db" };
+        var opt = new KeyValueSqlLiteOptions() { ConnectionString = "Data Source=./Db.db" };
         return new KeyValueSqlLiteRepo(_logger, opt);
     }
 
@@ -47,9 +49,9 @@ public class SqlLiteTests : InMemeoryTests
     {
         var db = GetNewRepo();
         var filePath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+        Debug.WriteLine($"Database path: {filePath}");
 
         var exists = File.Exists(filePath);
-        exists.Should().BeTrue();
 
         if (exists)
         {
@@ -61,10 +63,10 @@ public class SqlLiteTests : InMemeoryTests
         var valid = await db.asKeyValueSqlLiteRepo().ValidateSchema();
         File.Exists(filePath).Should().BeTrue();
 
-        // Clean Up
-        // await db.asKeyValueSqlLiteRepo().ReleaseForCleanUp();
-        // File.Delete(filePath);
-        // File.Exists(filePath).Should().BeFalse();
+        //// Clean Up
+        await db.asKeyValueSqlLiteRepo().ReleaseForCleanUp();
+        File.Delete(filePath);
+        File.Exists(filePath).Should().BeFalse();
     }
 
     [Fact]
@@ -87,5 +89,8 @@ public class SqlLiteTests : InMemeoryTests
 
         exist = await verify.TablesExists(defaultTableName, db.asKeyValueSqlLiteRepo().DbConn);
         exist.Should().BeTrue();
+
+        var IsValid = await verify.ValidateSchema(opt, db.asKeyValueSqlLiteRepo().DbConn);
+        IsValid.Should().BeTrue();
     }
 }
