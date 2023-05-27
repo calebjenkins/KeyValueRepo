@@ -6,13 +6,13 @@ namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public static class KeyValueSqlLiteRepoExtensions
 {
-    public static KeyValueSqlLiteRepo asKeyValueSqlLiteRepo(this IKeyValueRepo repo)
+    public static KeyValueSqLiteRepo AsKeyValueSqlLiteRepo(this IKeyValueRepo repo)
     {
-        if(repo is KeyValueSqlLiteRepo)
+        if(repo is KeyValueSqLiteRepo)
         {
-            return (KeyValueSqlLiteRepo)repo;
+            return (KeyValueSqLiteRepo)repo;
         }
-        return null;
+        throw new ArgumentException("Cannot convert non KeyValueSqlLiteRepo instances.");
     }
 
     public static void ConfirmOpen(this SqliteConnection db)

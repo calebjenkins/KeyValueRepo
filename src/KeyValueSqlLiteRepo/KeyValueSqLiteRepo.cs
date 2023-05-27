@@ -1,19 +1,19 @@
 ﻿
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
-public class KeyValueSqlLiteRepo : IKeyValueRepo
+public class KeyValueSqLiteRepo : IKeyValueRepo
 { 
-    private ILogger<KeyValueSqlLiteRepo> _logger;
+    private ILogger<KeyValueSqLiteRepo> _logger;
     private KeyValueSqlLiteOptions _options;
 
-    private Microsoft.Data.Sqlite.SqliteConnection _db;
+    private SqliteConnection _db;
 
-    public KeyValueSqlLiteRepo(ILogger<KeyValueSqlLiteRepo> Logger, KeyValueSqlLiteOptions Options = null)
+    public KeyValueSqLiteRepo(ILogger<KeyValueSqLiteRepo> Logger, KeyValueSqlLiteOptions Options = null)
     {
         _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
         _options = Options ?? new KeyValueSqlLiteOptions();
 
-        _db = new Microsoft.Data.Sqlite.SqliteConnection(_options.ConnectionString);
+        _db = new SqliteConnection(_options.ConnectionString);
 
         if (_options.ValidateSchemaOnStartUp)
         {

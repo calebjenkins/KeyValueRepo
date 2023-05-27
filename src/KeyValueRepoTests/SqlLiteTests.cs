@@ -4,12 +4,12 @@ namespace KeyValueRepoTests;
 
 public class SqlLiteTests : InMemeoryTests
 {
-    ILogger<KeyValueSqlLiteRepo> _logger = new Moq.Mock<ILogger<KeyValueSqlLiteRepo>>().Object;
+    ILogger<KeyValueSqLiteRepo> _logger = new Moq.Mock<ILogger<KeyValueSqLiteRepo>>().Object;
 
     public override IKeyValueRepo GetNewRepo()
     {
         var opt = new KeyValueSqlLiteOptions() { ConnectionString = "Data Source=./Db.db" };
-        return new KeyValueSqlLiteRepo(_logger, opt);
+        return new KeyValueSqLiteRepo(_logger, opt);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public class SqlLiteTests : InMemeoryTests
     public async Task ShouldCreateDbInstance()
     {
         var db = GetNewRepo();
-        var result = await db.asKeyValueSqlLiteRepo().ValidateSchema();
+        var result = await db.AsKeyValueSqlLiteRepo().ValidateSchema();
         result.Should().BeTrue();
     }
 
@@ -31,15 +31,15 @@ public class SqlLiteTests : InMemeoryTests
     public void FileNameIsAvailable()
     {
         var db = GetNewRepo();
-        var filepath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+        var filepath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
         filepath.Should().Contain("_Data\\Db.db");
     }
 
     [Fact]
     public void DefaultFileNameShouldBeProvided()
     {
-        ILogger<KeyValueSqlLiteRepo> _logger = new Mock<ILogger<KeyValueSqlLiteRepo>>().Object;
-        var db = new KeyValueSqlLiteRepo(_logger);
+        ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
+        var db = new KeyValueSqLiteRepo(_logger);
         var filePath = db.DatabaseFileName;
         filePath.Should().Contain("KeyValueDatabase.db");
     }
@@ -48,19 +48,19 @@ public class SqlLiteTests : InMemeoryTests
     public async Task CorrectFileGetsCreated()
     {
         var db = GetNewRepo();
-        var filePath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+        var filePath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
 
         // Clear File
-        await removeDbFileIfExists(db.asKeyValueSqlLiteRepo());
+        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
 
         // Create a new File
-        var valid = await db.asKeyValueSqlLiteRepo().ValidateSchema();
+        var valid = await db.AsKeyValueSqlLiteRepo().ValidateSchema();
         File.Exists(filePath).Should().BeTrue();
 
         // Clean Up
-        await removeDbFileIfExists(db.asKeyValueSqlLiteRepo());
+        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
     }
-    private async Task removeDbFileIfExists(KeyValueSqlLiteRepo Repo)
+    private async Task removeDbFileIfExists(KeyValueSqLiteRepo Repo)
     {
         var filePath = Repo.DatabaseFileName;
         Debug.WriteLine($"Database path: {filePath}");
@@ -79,9 +79,9 @@ public class SqlLiteTests : InMemeoryTests
     public async Task ConfirmTableDoesNotExistAndCanBeCreated()
     {
         var db = GetNewRepo();
-        var filePath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+        var filePath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
         // Reset DB
-        await removeDbFileIfExists(db.asKeyValueSqlLiteRepo());
+        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
 
         var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
         var defaultTableName = opt.DefaultTableName;
@@ -89,16 +89,16 @@ public class SqlLiteTests : InMemeoryTests
         ILogger<SchemaValidator> _SchemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
 
         var verify = new SchemaValidator(_SchemaLogger);
-        bool exist = await verify.TablesExists(defaultTableName, db.asKeyValueSqlLiteRepo().DbConn);
+        bool exist = await verify.TablesExists(defaultTableName, db.AsKeyValueSqlLiteRepo().DbConn);
         exist.Should().BeFalse();
 
-        bool tableCreated = await verify.CreateAllTables(opt, db.asKeyValueSqlLiteRepo().DbConn);
+        bool tableCreated = await verify.CreateAllTables(opt, db.AsKeyValueSqlLiteRepo().DbConn);
         tableCreated.Should().BeTrue();
 
-        exist = await verify.TablesExists(defaultTableName, db.asKeyValueSqlLiteRepo().DbConn);
+        exist = await verify.TablesExists(defaultTableName, db.AsKeyValueSqlLiteRepo().DbConn);
         exist.Should().BeTrue();
 
-        var IsValid = await verify.ValidateSchema(opt, db.asKeyValueSqlLiteRepo().DbConn);
+        var IsValid = await verify.ValidateSchema(opt, db.AsKeyValueSqlLiteRepo().DbConn);
         IsValid.HasError.Should().BeFalse();
         IsValid.Messages.Count.Should().Be(7);
     }
