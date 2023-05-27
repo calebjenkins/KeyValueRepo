@@ -5,13 +5,15 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 { 
     private ILogger<KeyValueSqLiteRepo> _logger;
     private KeyValueSqlLiteOptions _options;
+    private SchemaValidator _validator;
 
     private SqliteConnection _db;
 
-    public KeyValueSqLiteRepo(ILogger<KeyValueSqLiteRepo> Logger, KeyValueSqlLiteOptions Options = null)
+    public KeyValueSqLiteRepo(ILogger<KeyValueSqLiteRepo> Logger, SchemaValidator Validator, KeyValueSqlLiteOptions Options = null)
     {
         _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
         _options = Options ?? new KeyValueSqlLiteOptions();
+        _validator = Validator?? throw new ArgumentNullException(nameof(Validator));
 
         _db = new SqliteConnection(_options.ConnectionString);
 
@@ -19,6 +21,12 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             var validate =  ValidateSchema();
             validate.Wait();
+
+            bool isValid = validate.Result;
+            if (!isValid)
+            {
+                _logger.LogError( $"KeyValueRepo ({_options.DefaultTableName}) schema could not be validated - please see log for additional information." );
+            }
         }
     }
 
@@ -29,20 +37,18 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
     public async Task<bool> ValidateSchema()
     {
-        _logger.LogInformation("Validating KeyValue Database Schema");
+        _logger.LogInformation("Validating KeyValueRepo Database Schema");
         bool validSchema = false;
 
         await _db.OpenAsync();
 
-
-
-        if(_options.CreateTableIfMissing)
-
+        var result = _validator.ValidateSchema(_options, _db);
 
         _db.Close();
 
         return true;
     }
+
     public async Task ReleaseForCleanUp()
     {
         await _db.CloseAsync();

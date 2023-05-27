@@ -160,6 +160,10 @@ public class SchemaValidator
             _logger.LogError($"Error trying to validate schema {ex.Message}");
             throw;
         }
+        finally
+        {
+            DbConnection.Close();
+        }
 
         return (hasErrors, results);
     }

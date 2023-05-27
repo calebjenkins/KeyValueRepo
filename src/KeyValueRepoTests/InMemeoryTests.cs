@@ -8,7 +8,7 @@ public class InMemeoryTests{
     }
 
     [Fact]
-    public async Task InMemoryShouldHoldValues()
+    public async Task RepoShouldHoldValues()
     {
         IKeyValueRepo repo = GetNewRepo();
         var p = new Person("Test", "Last", 1);

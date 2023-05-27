@@ -2,7 +2,7 @@
 
 namespace KeyValueRepoTests;
 
-public class SqlLiteTests : InMemeoryTests
+public class SqLiteTests : InMemeoryTests
 {
     ILogger<KeyValueSqLiteRepo> _logger = new Moq.Mock<ILogger<KeyValueSqLiteRepo>>().Object;
 
