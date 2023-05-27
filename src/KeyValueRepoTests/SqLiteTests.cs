@@ -4,12 +4,14 @@ namespace KeyValueRepoTests;
 
 public class SqLiteTests : InMemeoryTests
 {
-    ILogger<KeyValueSqLiteRepo> _logger = new Moq.Mock<ILogger<KeyValueSqLiteRepo>>().Object;
+    ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
+    ILogger<SchemaValidator> _schemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
 
     public override IKeyValueRepo GetNewRepo()
     {
         var opt = new KeyValueSqlLiteOptions() { ConnectionString = "Data Source=./Db.db" };
-        return new KeyValueSqLiteRepo(_logger, opt);
+        var validator = new SchemaValidator(_schemaLogger);
+        return new KeyValueSqLiteRepo(_logger, validator, opt);
     }
 
     [Fact]
@@ -39,7 +41,10 @@ public class SqLiteTests : InMemeoryTests
     public void DefaultFileNameShouldBeProvided()
     {
         ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
-        var db = new KeyValueSqLiteRepo(_logger);
+        ILogger<SchemaValidator> _loggerValidator = new Mock<ILogger<SchemaValidator>>().Object;
+        SchemaValidator _validator = new SchemaValidator(_loggerValidator);
+
+        var db = new KeyValueSqLiteRepo(_logger, _validator);
         var filePath = db.DatabaseFileName;
         filePath.Should().Contain("KeyValueDatabase.db");
     }
@@ -60,6 +65,7 @@ public class SqLiteTests : InMemeoryTests
         // Clean Up
         await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
     }
+
     private async Task removeDbFileIfExists(KeyValueSqLiteRepo Repo)
     {
         var filePath = Repo.DatabaseFileName;

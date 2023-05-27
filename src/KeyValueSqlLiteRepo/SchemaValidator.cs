@@ -85,39 +85,70 @@ public class SchemaValidator
             return true;
 
         }
-        catch (SqliteException ex)
-        {
-            _logger.LogError("Error validating Default Table: {0}", ex.Message);
-            throw;
-        }
-        catch (DbException ex)
-        {
-            _logger.LogError("Error validating Default Table: {0}", ex.Message);
-            throw;
-        }
         catch (Exception ex)
         {
             _logger.LogError("Error validating Default Table: {0}", ex.Message);
             throw;
         }
     }
-    public async Task<bool> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection, bool OldOne)
-    {
-        bool result = false;
-        using (var tables = await DbConnection.GetSchemaAsync())
-        {
-            foreach (DataRow table in tables.Rows)
-            {
-                var t = (string)table["TABLE_NAME"];
-                result = (t == Options.DefaultTableName);
-            }
-        }
-        return result;
-    }
+
     public async Task<(bool HasError, IList<string> Messages)> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
     {
-        DbConnection.ConfirmOpen();
+        bool hasErrors = false;
+        IList<string> results = new List<string>();
 
+        try
+        {
+            DbConnection.ConfirmOpen();
+
+            // Check Existance of All Tables
+            foreach (var table in Options.AllTables())
+            {
+                var table_exists = await TablesExists(table, DbConnection);
+                if (!table_exists)
+                {
+                    if(Options.CreateTableIfMissing)
+                    {
+                        results.Add($"Table {table} is missing.. attempting to add");
+
+                        var created = await CreateTable(table, Options, DbConnection);
+                        table_exists = await TablesExists(table, DbConnection);
+
+                        if (!table_exists)
+                        {
+                            hasErrors = true;
+                            results.Add($"Tried to create table {table} did not work.");
+                        }
+                        else
+                        {
+                            results.Add($"Succesfully created table {table}");
+                        }
+                    }
+                    else
+                    {
+                        hasErrors = true;
+                        results.Add($"Tried to create table {table} did not work.");
+                    }
+                    
+                }
+                var validationResult = await ValidateSchema(table, Options, DbConnection);
+
+            }
+
+           
+        } catch (Exception ex)
+        {
+            _logger.LogError($"Error validating table - { ex.Message }");
+            return (true, results);
+        }
+        finally
+        {
+            await DbConnection.CloseAsync();
+        }
+    }
+
+    private async Task<(bool HasError, IList<string> Messages)> ValidateSchema(string TableName, KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    {
         bool hasErrors = false;
         IList<string> results = new List<string>();
 
@@ -135,11 +166,6 @@ public class SchemaValidator
             while (reader.Read())
             {
                 var col1 = reader.GetString(0);
-                var fieldCount = reader.FieldCount;
-                var visibleFieldCount = reader.VisibleFieldCount;
-                var col2 = reader.GetString(1);
-                var col3 = reader.GetString(2);
-                var col4 = reader.GetString(3);
                 var tableSql = reader.GetString(4);
                 // Pause for effect.
                 var columns = Options.AllColumnsWithPrefix();
@@ -157,7 +183,7 @@ public class SchemaValidator
             }
         } catch (Exception ex)
         {
-            _logger.LogError($"Error trying to validate schema {ex.Message}");
+            _logger.LogError($"Error trying to validate schema for table { TableName} - {ex.Message}");
             throw;
         }
         finally
