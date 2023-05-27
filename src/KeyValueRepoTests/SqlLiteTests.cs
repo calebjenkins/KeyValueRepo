@@ -49,24 +49,30 @@ public class SqlLiteTests : InMemeoryTests
     {
         var db = GetNewRepo();
         var filePath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+
+        // Clear File
+        await removeDbFileIfExists(db.asKeyValueSqlLiteRepo());
+
+        // Create a new File
+        var valid = await db.asKeyValueSqlLiteRepo().ValidateSchema();
+        File.Exists(filePath).Should().BeTrue();
+
+        // Clean Up
+        await removeDbFileIfExists(db.asKeyValueSqlLiteRepo());
+    }
+    private async Task removeDbFileIfExists(KeyValueSqlLiteRepo Repo)
+    {
+        var filePath = Repo.DatabaseFileName;
         Debug.WriteLine($"Database path: {filePath}");
 
         var exists = File.Exists(filePath);
 
         if (exists)
         {
-            await db.asKeyValueSqlLiteRepo().ReleaseForCleanUp();
+            await Repo.ReleaseForCleanUp();
             File.Delete(filePath);
             File.Exists(filePath).Should().BeFalse();
         }
-
-        var valid = await db.asKeyValueSqlLiteRepo().ValidateSchema();
-        File.Exists(filePath).Should().BeTrue();
-
-        //// Clean Up
-        await db.asKeyValueSqlLiteRepo().ReleaseForCleanUp();
-        File.Delete(filePath);
-        File.Exists(filePath).Should().BeFalse();
     }
 
     [Fact]
@@ -74,6 +80,8 @@ public class SqlLiteTests : InMemeoryTests
     {
         var db = GetNewRepo();
         var filePath = db.asKeyValueSqlLiteRepo().DatabaseFileName;
+        // Reset DB
+        await removeDbFileIfExists(db.asKeyValueSqlLiteRepo());
 
         var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
         var defaultTableName = opt.DefaultTableName;
@@ -91,6 +99,7 @@ public class SqlLiteTests : InMemeoryTests
         exist.Should().BeTrue();
 
         var IsValid = await verify.ValidateSchema(opt, db.asKeyValueSqlLiteRepo().DbConn);
-        IsValid.Should().BeTrue();
+        IsValid.HasError.Should().BeFalse();
+        IsValid.Messages.Count.Should().Be(7);
     }
 }

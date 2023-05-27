@@ -1,9 +1,7 @@
 ﻿
-using Microsoft.Data.Sqlite;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
@@ -103,10 +101,10 @@ public class SchemaValidator
             throw;
         }
     }
-    public async Task<bool> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    public async Task<bool> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection, bool OldOne)
     {
         bool result = false;
-        using (var tables = await DbConnection.GetSchemaAsync("Tables"))
+        using (var tables = await DbConnection.GetSchemaAsync())
         {
             foreach (DataRow table in tables.Rows)
             {
@@ -115,6 +113,64 @@ public class SchemaValidator
             }
         }
         return result;
+    }
+    public async Task<(bool HasError, IList<string> Messages)> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    {
+        DbConnection.ConfirmOpen();
+
+        bool hasErrors = false;
+        IList<string> results = new List<string>();
+
+        var sql = $@"SELECT * FROM sqlite_schema";
+
+        try
+        {
+            using var connection = DbConnection;
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = sql;
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (reader.Read())
+            {
+                var col1 = reader.GetString(0);
+                var fieldCount = reader.FieldCount;
+                var visibleFieldCount = reader.VisibleFieldCount;
+                var col2 = reader.GetString(1);
+                var col3 = reader.GetString(2);
+                var col4 = reader.GetString(3);
+                var tableSql = reader.GetString(4);
+                // Pause for effect.
+                var columns = Options.AllColumnsWithPrefix();
+
+                foreach (var c in columns)
+                {
+                    var result = CheckString(tableSql, c);
+                    if (result.Missing && hasErrors == false)
+                    {
+                        hasErrors = true;
+                    }
+
+                    results.Add(result.Message);
+                }
+            }
+        } catch (Exception ex)
+        {
+            _logger.LogError($"Error trying to validate schema {ex.Message}");
+            throw;
+        }
+
+        return (hasErrors, results);
+    }
+
+    private (bool Missing, string Message) CheckString(string SourceText, string SearchString)
+    {
+        bool notFound = !SourceText.Contains(SearchString, StringComparison.OrdinalIgnoreCase);
+        string foundText = (notFound) ? "not " : string.Empty;
+        string msg = $"{SearchString} was {foundText}found.";
+ 
+        return (notFound, msg);
     }
     public static string createTableSql(string TableName, KeyValueSqlLiteOptions opt)
     {
