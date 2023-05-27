@@ -9,7 +9,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
     private SqliteConnection _db;
 
-    public KeyValueSqLiteRepo(ILogger<KeyValueSqLiteRepo> Logger, SchemaValidator Validator, KeyValueSqlLiteOptions Options = null)
+    public KeyValueSqLiteRepo(ILogger<KeyValueSqLiteRepo> Logger, SchemaValidator Validator, KeyValueSqlLiteOptions? Options = null)
     {
         _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
         _options = Options ?? new KeyValueSqlLiteOptions();
@@ -38,15 +38,19 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
     public async Task<bool> ValidateSchema()
     {
         _logger.LogInformation("Validating KeyValueRepo Database Schema");
-        bool validSchema = false;
 
         await _db.OpenAsync();
 
-        var result = _validator.ValidateSchema(_options, _db);
+        var result = await _validator.ValidateSchema(_options, _db);
 
         _db.Close();
 
-        return true;
+        var resultMsg = (result.HasError) ? "there were Errors. Enable Debug to log the errors" : "Everything looked good";
+
+        _logger.LogInformation($"Finished Validating Schmema - {resultMsg}");
+        _logger.LogDebug($"Schema validation results: {result.Messages.ToString()}");
+        
+        return (!result.HasError);
     }
 
     public async Task ReleaseForCleanUp()

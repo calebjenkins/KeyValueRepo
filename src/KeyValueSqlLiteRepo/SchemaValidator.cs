@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using Calebs.Extensions;
 
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
@@ -107,38 +108,37 @@ public class SchemaValidator
                 var table_exists = await TablesExists(table, DbConnection);
                 if (!table_exists)
                 {
-                    if(Options.CreateTableIfMissing)
-                    {
-                        results.Add($"Table {table} is missing.. attempting to add");
+                    // if (Options.CreateTableIfMissing) // We always do this. 
+                    results.Add($"Table {table} is missing.. attempting to add");
 
-                        var created = await CreateTable(table, Options, DbConnection);
-                        table_exists = await TablesExists(table, DbConnection);
+                    var created = await CreateTable(table, Options, DbConnection);
+                    table_exists = await TablesExists(table, DbConnection);
 
-                        if (!table_exists)
-                        {
-                            hasErrors = true;
-                            results.Add($"Tried to create table {table} did not work.");
-                        }
-                        else
-                        {
-                            results.Add($"Succesfully created table {table}");
-                        }
-                    }
-                    else
+                    if (!table_exists)
                     {
                         hasErrors = true;
                         results.Add($"Tried to create table {table} did not work.");
                     }
-                    
+                    else
+                    {
+                        results.Add($"Succesfully created table {table}");
+                    }
                 }
+
                 var validationResult = await ValidateSchema(table, Options, DbConnection);
+                if(validationResult.HasError)
+                {
+                    hasErrors = true;
+                }
 
+                results.Concat(validationResult.Messages);
             }
+            return (hasErrors, results);
 
-           
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
-            _logger.LogError($"Error validating table - { ex.Message }");
+            _logger.LogError($"Error validating Schema - {ex.Message}");
             return (true, results);
         }
         finally
@@ -181,9 +181,10 @@ public class SchemaValidator
                     results.Add(result.Message);
                 }
             }
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
-            _logger.LogError($"Error trying to validate schema for table { TableName} - {ex.Message}");
+            _logger.LogError($"Error trying to validate schema for table {TableName} - {ex.Message}");
             throw;
         }
         finally
@@ -199,21 +200,22 @@ public class SchemaValidator
         bool notFound = !SourceText.Contains(SearchString, StringComparison.OrdinalIgnoreCase);
         string foundText = (notFound) ? "not " : string.Empty;
         string msg = $"{SearchString} was {foundText}found.";
- 
+
         return (notFound, msg);
     }
     public static string createTableSql(string TableName, KeyValueSqlLiteOptions opt)
     {
-        var auditColumnsSql = (!opt.UseAuditFields) ? string.Empty : $@",
-                    {opt.ColumnPrefix + opt.CreateByColumnName} TEXT,
-                    {opt.ColumnPrefix + opt.CreateOnColumnName} INTEGER NOT NULL,
-                    {opt.ColumnPrefix + opt.UpdatedByColumnName} TEXT,
-                    {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER NOT NULL ";
+        // var auditColumnsSql = (!opt.UseAuditFields) ? string.Empty : $@", // We always use Audit Fields
+                   
 
         var createTableSql = $@"
             CREATE TABLE IF NOT EXISTS {TableName} ({opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
                     {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT NOT NULL,
-                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT {auditColumnsSql}  );";
+                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT,
+                    {opt.ColumnPrefix + opt.CreateByColumnName} TEXT,
+                    {opt.ColumnPrefix + opt.CreateOnColumnName} INTEGER NOT NULL,
+                    {opt.ColumnPrefix + opt.UpdatedByColumnName} TEXT,
+                    {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER NOT NULL) ; ";
         // Primary Key ({ opt.ColumnPrefix + opt.KeyColumnName }, { opt.ColumnPrefix + opt.TypeValueColumnName }));";
 
         Debug.Print($"Sql: {createTableSql} ");
