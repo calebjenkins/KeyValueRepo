@@ -23,11 +23,6 @@ public static class KeyValueSqliteOptionsExtensions
             Opt.DefaultTableName
         };
 
-        foreach(string name in Opt.NonDefaultTableMapping.Values)
-        {
-            result.Add(name);
-        }
-
         return result;
     }
 }

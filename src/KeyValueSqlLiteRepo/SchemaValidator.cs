@@ -54,18 +54,6 @@ public class SchemaValidator
     {
         var TotalResult = await CreateTable(Options.DefaultTableName, Options, DbConnection);
 
-        if (TotalResult)
-        {
-            foreach (var tableName in Options.NonDefaultTableMapping.Values)
-            {
-                var thisResult = await CreateTable(tableName, Options, DbConnection);
-                if (!thisResult)
-                {
-                    TotalResult = thisResult;
-                }
-            }
-        }
-
         return TotalResult;
     }
     public async Task<bool> CreateTable(string TableName, KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)

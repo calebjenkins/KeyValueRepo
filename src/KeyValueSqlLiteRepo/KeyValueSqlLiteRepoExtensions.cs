@@ -1,8 +1,4 @@
-﻿
-using System.Data.Common;
-using System.Runtime.CompilerServices;
-
-namespace Calebs.Data.KeyValueRepo.SqlLite;
+﻿namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public static class KeyValueSqlLiteRepoExtensions
 {

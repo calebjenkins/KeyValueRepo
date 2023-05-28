@@ -15,10 +15,4 @@ public class KeyValueSqlLiteOptions
     public string CreateOnColumnName { get; set; } = "CreatedOn";
     public string UpdatedByColumnName { get; set; } = "UpdatedBy";
     public string UpdatedOnColumnName { get; set; } = "UpdatedOn";
-
-    /// <summary>
-    /// Keys - Type that should be mapped
-    /// Value - Name of Table to map to
-    /// </summary>
-    public Dictionary<string, string> NonDefaultTableMapping { get; set; } = new Dictionary<string, string>();
 }
