@@ -125,13 +125,13 @@ public class SchemaValidator
                     }
                 }
 
-                var validationResult = await ValidateSchema(table, Options, DbConnection);
+                var validationResult = await ValidateTableSchema(table, Options, DbConnection);
                 if(validationResult.HasError)
                 {
                     hasErrors = true;
                 }
 
-                results.Concat(validationResult.Messages);
+                results.AddRange(validationResult.Messages);
             }
             return (hasErrors, results);
 
@@ -147,7 +147,7 @@ public class SchemaValidator
         }
     }
 
-    private async Task<(bool HasError, IList<string> Messages)> ValidateSchema(string TableName, KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    private async Task<(bool HasError, IList<string> Messages)> ValidateTableSchema(string TableName, KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
     {
         bool hasErrors = false;
         IList<string> results = new List<string>();

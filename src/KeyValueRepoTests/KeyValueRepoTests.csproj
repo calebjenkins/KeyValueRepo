@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_Data\**" />
+    <EmbeddedResource Remove="_Data\**" />
+    <None Remove="_Data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="coverlet.msbuild" Version="3.2.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,10 +37,6 @@
   <ItemGroup>
     <ProjectReference Include="..\KeyValueRepo\KeyValueRepo.csproj" />
     <ProjectReference Include="..\KeyValueSqlLiteRepo\KeyValueSqlLiteRepo.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="_Data\" />
   </ItemGroup>
 
 </Project>

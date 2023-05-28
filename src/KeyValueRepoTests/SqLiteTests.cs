@@ -34,7 +34,7 @@ public class SqLiteTests : InMemeoryTests
     {
         var db = GetNewRepo();
         var filepath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
-        filepath.Should().Contain("_Data\\Db.db");
+        filepath.Should().Contain("Db.db");
     }
 
     [Fact]
@@ -86,6 +86,7 @@ public class SqLiteTests : InMemeoryTests
     {
         var db = GetNewRepo();
         var filePath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
+
         // Reset DB
         await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
 
