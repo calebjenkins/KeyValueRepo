@@ -148,6 +148,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                                             WHERE WHERE $Key_Column = $Key_Value
                                              AND $ValueType_Column = $ValueType_Value));";
 
+        cmd.CommandText = sql;
         return cmd;
 
     }
@@ -182,6 +183,8 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                       AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
                                              WHERE
                                              AND $ValueType_Column = $ValueType_Value));";
+
+        cmd.CommandText = sql;
 
         return cmd;
 
@@ -234,6 +237,8 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                             $UpdatedBy_Value,
                             unixepoch($UpdatedOn_Value)
                              );";
+
+        cmd.CommandText = sql;
 
         return cmd;
 
