@@ -1,4 +1,5 @@
 ﻿
+using Newtonsoft.Json.Linq;
 using System;
 using System.Data.Common;
 using System.Diagnostics;
@@ -88,30 +89,23 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
     {
         return false;
     }
-    private async Task<bool> selectRecord(string key, string valueType)
-    { 
-        // Only one table ever used - right now
-        var tableName = _options.DefaultTableName;
-
-        var sql = "";
-  
+    private async Task<string> selectRecord(string key, string valueType)
+    {
+        var Value = string.Empty;
         try
         {
             _db.ConfirmOpen();
             using var connection = _db;
             connection.Open();
 
-            var command = connection.CreateCommand();
-            command.CommandText = sql;
-            command.Parameters.AddWithValue("$table_name", tableName);
-
+            var command = getCommandForSelectOne(key, valueType, connection, _options);
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
-                var name = reader.GetString(0);
+                Value = reader.GetString(2);
                
             }
-            return false;
+            return Value;
         }
         catch (SqliteException ex)
         {
@@ -120,27 +114,131 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         }
     }
 
-    private SqliteCommand getCommandForSelect(string key, string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand getCommandForSelectOne(string key, string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
         cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
         cmd.Parameters.AddWithValue("$Key_Value", key);
 
+        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
+
+        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
+        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
+
+        cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
+
+
         var sql = $@"SELECT $Key_Column,
-                            {Opt.ColumnPrefix + Opt.TypeValueColumnName},
-                            {Opt.ColumnPrefix + Opt.ValueColumnName},
-                            {Opt.ColumnPrefix + Opt.CreateByColumnName},
-                            {Opt.ColumnPrefix + Opt.CreateOnColumnName},
-                            {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
-                            {Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
+                            $ValueType_Column,
+                            $Value_Column,
+                            $CreatedBy_Column,
+                            $CreatedOn_Column,
+                            $UpdatedBy_Column,
+                            $UpdatedOn_Column
 
                     FROM $table_name;
 
                     WHERE $Key_Column = $Key_Value
-                      AND {_options.ColumnPrefix + _options.TypeValueColumnName} = {valueType}
-                      AND {_options.ColumnPrefix + _options.UpdatedOnColumnName} = (SELECT MAX({_options.ColumnPrefix + _options.UpdatedOnColumnName}) FROM yourTable WHERE orderNo = [data].orderNo));";
+                      AND $ValueType_Column = $ValueType_Value
+                      AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
+                                            WHERE WHERE $Key_Column = $Key_Value
+                                             AND $ValueType_Column = $ValueType_Value));";
 
         return cmd;
 
     }
+
+    private SqliteCommand getCommandForSelectAll(string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    {
+        var cmd = Db.CreateCommand();
+
+        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
+
+        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
+        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
+
+        cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
+
+
+        var sql = $@"SELECT $Key_Column,
+                            $ValueType_Column,
+                            $Value_Column,
+                            $CreatedBy_Column,
+                            $CreatedOn_Column,
+                            $UpdatedBy_Column,
+                            $UpdatedOn_Column
+
+                    FROM $table_name;
+
+                    WHERE $ValueType_Column = $ValueType_Value
+                      AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
+                                             WHERE
+                                             AND $ValueType_Column = $ValueType_Value));";
+
+        return cmd;
+
+    }
+
+    private SqliteCommand getCommandForInsert(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    {
+        var utcNow = DateTime.UtcNow;
+        var cmd = Db.CreateCommand();
+        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
+        cmd.Parameters.AddWithValue("$Key_Value", key);
+
+        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
+
+        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$Value_Value", value);
+
+        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
+        cmd.Parameters.AddWithValue("$CreatedBy_Value", User);
+
+        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
+        cmd.Parameters.AddWithValue("$CreatedOn_Value", utcNow);
+
+        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedBy_Value", User);
+
+        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedOn_Value", utcNow);
+
+
+        cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
+
+
+        // INSERT INTO table_name (column1, column2, column3, ...)
+        // VALUES(value1, value2, value3, ...);
+        var sql = $@"INSERT INTO $table_name
+                            ( $Key_Column,
+                            $ValueType_Column,
+                            $Value_Column,
+                            $CreatedBy_Column,
+                            $CreatedOn_Column,
+                            $UpdatedBy_Column,
+                            $UpdatedOn_Column)
+                    VALUES ($Key_Value,
+                            $ValueType_Value,
+                            $Value_Value,
+                            $CreatedBy_Value,
+                            unixepoch($CreatedOn_Value),
+                            $UpdatedBy_Value,
+                            unixepoch($UpdatedOn_Value)
+                             );";
+
+        return cmd;
+
+    }
+
+
+
 }
