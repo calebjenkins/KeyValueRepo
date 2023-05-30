@@ -116,7 +116,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         }
     }
 
-    private SqliteCommand getCommandForSelectOne(string key, string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand getCommandForSelectOne(string key, string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt, bool hasHistory = true)
     {
         var cmd = Db.CreateCommand();
         cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
@@ -133,6 +133,9 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
         cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
 
+        var historySql = (!hasHistory)? string.Empty : $@"AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
+                                            WHERE WHERE $Key_Column = $Key_Value
+                                             AND $ValueType_Column = $ValueType_Value)"
 
         var sql = $@"SELECT $Key_Column,
                             $ValueType_Column,
@@ -146,9 +149,43 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
                     WHERE $Key_Column = $Key_Value
                       AND $ValueType_Column = $ValueType_Value
-                      AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
-                                            WHERE WHERE $Key_Column = $Key_Value
-                                             AND $ValueType_Column = $ValueType_Value));";
+                      {historySql} ;";
+
+        cmd.CommandText = sql;
+        return cmd;
+
+    }
+
+    private SqliteCommand getCommandForSelectOneIncludeHistory(string key, string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    {
+        var cmd = Db.CreateCommand();
+        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
+        cmd.Parameters.AddWithValue("$Key_Value", key);
+
+        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
+
+        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
+        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
+
+        cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
+
+        var sql = $@"SELECT $Key_Column,
+                            $ValueType_Column,
+                            $Value_Column,
+                            $CreatedBy_Column,
+                            $CreatedOn_Column,
+                            $UpdatedBy_Column,
+                            $UpdatedOn_Column
+
+                    FROM $table_name;
+
+                    WHERE $Key_Column = $Key_Value
+                      AND $ValueType_Column = $ValueType_Value
+                 ORDER BY $UpdatedOn_Column ASC;";
 
         cmd.CommandText = sql;
         return cmd;
