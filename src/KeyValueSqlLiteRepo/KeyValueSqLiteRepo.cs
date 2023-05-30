@@ -1,4 +1,5 @@
 ﻿
+using Calebs.Extensions;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;
 using System;
@@ -72,9 +73,13 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         return;
     }
 
-    public Task<T?> Get<T>(string key) where T : class
+    public async Task<T?> Get<T>(string key) where T : class
     {
-        throw new NotImplementedException();
+        var valueType = typeof(T).ToString();
+        var value = await selectRecord(key, valueType);
+        var returnValue = value.FromJson<T>();
+
+        return returnValue;
     }
 
     public Task<IList<T>> GetAll<T>() where T : class
@@ -82,14 +87,38 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         throw new NotImplementedException();
     }
 
-    public Task Update<T>(string key, T value) where T : class
+    public async Task Update<T>(string key, T value) where T : class
     {
-        throw new NotImplementedException();
+        // Insert or update?
+        T? existing = await Get<T>(key);
+        var valueType = typeof(T).ToString();
+        if (existing != null)
+        {
+            // update
+            
+            return;
+        }
+        // Insert
+
+        return;
+        
     }
 
     private async Task<bool> insertRecord(string key, string valueType, string value, string user)
     {
-        return false;
+        try
+        {
+            _db.ConfirmOpen();
+
+            var command = getCommandForInsert(key, valueType, value, user, _db, _options);
+            var result = await command.ExecuteNonQueryAsync();
+            return (result > 0)? true : false;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            return false;
+        }
     }
     private async Task<string> selectRecord(string key, string valueType)
     {
@@ -97,10 +126,8 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         try
         {
             _db.ConfirmOpen();
-            using var connection = _db;
-            connection.Open();
 
-            var command = getCommandForSelectOne(key, valueType, connection, _options);
+            var command = getCommandForSelectOne(key, valueType, _db, _options);
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
@@ -133,9 +160,9 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
         cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
 
-        var historySql = (!hasHistory)? string.Empty : $@"AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
+        var historySql = (!hasHistory) ? string.Empty : $@"AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
                                             WHERE WHERE $Key_Column = $Key_Value
-                                             AND $ValueType_Column = $ValueType_Value)"
+                                             AND $ValueType_Column = $ValueType_Value)";
 
         var sql = $@"SELECT $Key_Column,
                             $ValueType_Column,
