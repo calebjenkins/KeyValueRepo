@@ -14,13 +14,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{BBC3
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\dev-ci.yml = .github\workflows\dev-ci.yml
 		.github\workflows\main-publish.yml = .github\workflows\main-publish.yml
+		.github\workflows\working-branches.yml = .github\workflows\working-branches.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepo", "src\KeyValueRepo\KeyValueRepo.csproj", "{64A286A1-FEAE-4E1F-BA60-79BACEFE1C11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.NugetSample", "src\Tests.NugetSample\Tests.NugetSample.csproj", "{91BE2686-F31B-4895-B981-C9E833219F53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyValueSqlLiteRepo", "src\KeyValueSqlLiteRepo\KeyValueSqlLiteRepo.csproj", "{995D4906-1ECE-4B4F-84CA-53F11F3319B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueSqlLiteRepo", "src\KeyValueSqlLiteRepo\KeyValueSqlLiteRepo.csproj", "{995D4906-1ECE-4B4F-84CA-53F11F3319B6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepoTests", "src\KeyValueRepoTests\KeyValueRepoTests.csproj", "{CDC1E510-A04E-4854-924F-EAD2D81F6411}"
 EndProject
