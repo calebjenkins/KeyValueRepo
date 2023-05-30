@@ -1,6 +1,8 @@
 ﻿
+using Microsoft.VisualBasic;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 
@@ -237,6 +239,45 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                             $UpdatedBy_Value,
                             unixepoch($UpdatedOn_Value)
                              );";
+
+        cmd.CommandText = sql;
+
+        return cmd;
+
+    }
+
+    private SqliteCommand getCommandForUpdate(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    {
+        var utcNow = DateTime.UtcNow;
+        var cmd = Db.CreateCommand();
+        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
+        cmd.Parameters.AddWithValue("$Key_Value", key);
+
+        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
+
+        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
+        cmd.Parameters.AddWithValue("$Value_Value", value);
+
+        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedBy_Value", User);
+
+        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
+        cmd.Parameters.AddWithValue("$UpdatedOn_Value", utcNow);
+
+
+        cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
+
+
+        //  UPDATE table_name
+        //  SET column1 = value1, column2 = value2...., columnN = valueN
+        //  WHERE[condition];
+        var sql = $@"UPDATE $table_name
+                        SET $Value_Column = $Value_Value,
+                            $UpdatedBy_Column = $UpdatedBy_Value,
+                            $UpdatedOn_Column = unixepoch($UpdatedOn_Value)
+                      WHERE $Key_Column = $Key_Value
+                        AND $ValueType_Column = $ValueType_Value;";
 
         cmd.CommandText = sql;
 
