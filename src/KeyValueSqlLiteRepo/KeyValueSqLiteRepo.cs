@@ -82,27 +82,47 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         return returnValue;
     }
 
-    public Task<IList<T>> GetAll<T>() where T : class
+    public async Task<IList<T>> GetAll<T>() where T : class
     {
-        throw new NotImplementedException();
+        if(_options.TrackHistory)
+        {
+            _logger.LogError("Cannot use GetAll when TrackHistory is enabled, Set TrackHistory to False in te config and try again.");
+           // throw new InvalidOperationException("Cannot use GetAll when TrackHistory is enabled");
+           return new List<T>();
+        }
+
+        var list = await selectAllRecords<T>();
+        return list;
     }
 
     public async Task Update<T>(string key, T value) where T : class
     {
-        // Insert or update?
-        T? existing = await Get<T>(key);
         var valueType = typeof(T).ToString();
-        if (existing != null)
-        {
-            // update
-            
-            return;
-        }
-        // Insert
+        var user = getCurrentUser();
 
-        return;
+        // Insert or upsert?
+
+        if(_options.TrackHistory)
+        {
+            // Insert
+            var result = await insertRecord(key, valueType, value.ToJson(), user);
+        }
+        else
+        {
+            // upsert
+            var result = await updateRecord(key, valueType, value.ToJson(), user);
+            
+        }
         
     }
+
+#pragma warning disable CS8603 // Possible null reference return.
+    private string getCurrentUser()
+    {
+        string? user =  Thread.CurrentPrincipal?.Identity?.Name;
+        return user.IsNotNullOrEmpty() ? user : string.Empty;
+    }
+#pragma warning restore CS8603 // Possible null reference return.
 
     private async Task<bool> insertRecord(string key, string valueType, string value, string user)
     {
@@ -113,6 +133,22 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
             var command = getCommandForInsert(key, valueType, value, user, _db, _options);
             var result = await command.ExecuteNonQueryAsync();
             return (result > 0)? true : false;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            return false;
+        }
+    }
+    private async Task<bool> updateRecord(string key, string valueType, string value, string user)
+    {
+        try
+        {
+            _db.ConfirmOpen();
+
+            var command = getCommandForUpcert(key, valueType, value, user, _db, _options);
+            var result = await command.ExecuteNonQueryAsync();
+            return (result > 0) ? true : false;
         }
         catch (SqliteException ex)
         {
@@ -143,6 +179,32 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         }
     }
 
+    private async Task<IList<T>> selectAllRecords<T>() where T: class
+    {
+        var valueType = typeof(T).ToString();
+
+        IList<T> Values = new List<T>();
+        try
+        {
+            _db.ConfirmOpen();
+
+            var command = getCommandForSelectAll(valueType, _db, _options);
+            using var reader = await command.ExecuteReaderAsync();
+            while (reader.Read())
+            {
+                T itm = reader.GetString(2).FromJson<T>();
+                Values.Add(itm);
+            }
+
+            return Values;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            throw;
+        }
+    }
+
     private SqliteCommand getCommandForSelectOne(string key, string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt, bool hasHistory = true)
     {
         var cmd = Db.CreateCommand();
@@ -161,7 +223,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
 
         var historySql = (!hasHistory) ? string.Empty : $@"AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
-                                            WHERE WHERE $Key_Column = $Key_Value
+                                            WHERE $Key_Column = $Key_Value
                                              AND $ValueType_Column = $ValueType_Value)";
 
         var sql = $@"SELECT $Key_Column,
@@ -222,7 +284,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
     private SqliteCommand getCommandForSelectAll(string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
-
+        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
         cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
         cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
 
@@ -234,21 +296,19 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
         cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
 
-
-        var sql = $@"SELECT $Key_Column,
-                            $ValueType_Column,
-                            $Value_Column,
-                            $CreatedBy_Column,
-                            $CreatedOn_Column,
-                            $UpdatedBy_Column,
-                            $UpdatedOn_Column
-
-                    FROM $table_name;
-
-                    WHERE $ValueType_Column = $ValueType_Value
-                      AND $UpdatedOn_Column = (SELECT MAX($UpdatedOn_Column) FROM $table_name
-                                             WHERE
-                                             AND $ValueType_Column = $ValueType_Value));";
+        var sql = $@"
+            SELECT t.$Key_Column, t.$ValueType_Column, t.$ValueColumn, 
+                   t.$CreatedBy_Column, t.$CreatedOn_Column, t.$UpdatedBy_Column, t.$UpdatedOn_Column
+            FROM $table_name as t
+            JOIN (
+                SELECT $Key_Column, MAX($UpdatedOn_Column) AS MaxDate
+                FROM [$table_name]
+                WHERE $ValueType_Column = $ValueType_Value
+                GROUP BY $Key_Column
+            ) as sub
+            ON t.$Key_Column = sub.$Key_Column
+            AND t.$UpdatedOn_Column = sub.MaxDate;
+";
 
         cmd.CommandText = sql;
 
@@ -310,7 +370,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
     }
 
-    private SqliteCommand getCommandForUpdate(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand getCommandForUpcert(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var utcNow = DateTime.UtcNow;
         var cmd = Db.CreateCommand();
@@ -336,12 +396,36 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         //  UPDATE table_name
         //  SET column1 = value1, column2 = value2...., columnN = valueN
         //  WHERE[condition];
-        var sql = $@"UPDATE $table_name
+        var sql = $@"
+                BEGIN
+                     UPDATE $table_name
                         SET $Value_Column = $Value_Value,
                             $UpdatedBy_Column = $UpdatedBy_Value,
                             $UpdatedOn_Column = unixepoch($UpdatedOn_Value)
                       WHERE $Key_Column = $Key_Value
-                        AND $ValueType_Column = $ValueType_Value;";
+                        AND $ValueType_Column = $ValueType_Value; Go;
+                    int changed = changes();
+               IIF(changed < 1, 
+                     INSERT INTO $table_name
+                            ( $Key_Column,
+                            $ValueType_Column,
+                            $Value_Column,
+                            $CreatedBy_Column,
+                            $CreatedOn_Column,
+                            $UpdatedBy_Column,
+                            $UpdatedOn_Column)
+                    VALUES ($Key_Value,
+                            $ValueType_Value,
+                            $Value_Value,
+                            $CreatedBy_Value,
+                            unixepoch($CreatedOn_Value),
+                            $UpdatedBy_Value,
+                            unixepoch($UpdatedOn_Value)
+                             )
+                        , );
+                END
+";
+                
 
         cmd.CommandText = sql;
 

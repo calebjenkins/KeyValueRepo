@@ -4,6 +4,7 @@ public class KeyValueSqlLiteOptions
 {
     public string ConnectionString { get; set; } = "Data Source=./KeyValueDatabase.db";
     public bool ValidateSchemaOnStartUp { get; set; } = true;
+    public bool TrackHistory { get; set; } = false;
 
     public string DefaultTableName { get; set; } = "KeyValueRepo";
     public string ColumnPrefix { get; set; } = string.Empty;
