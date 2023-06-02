@@ -181,7 +181,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             _db.ConfirmOpen();
 
-            var command = getCommandForSelectAll(valueType, _db, _options);
+            var command = getCommandForSelectAll(valueType, ref _db, _options);
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
@@ -273,7 +273,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
     }
 
-    private SqliteCommand getCommandForSelectAll(string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand getCommandForSelectAll(string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
         cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
@@ -289,17 +289,23 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
        // cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
 
         var sql = $@"
-            SELECT t.$Key_Column, t.$ValueType_Column, t.$ValueColumn, 
-                   t.$CreatedBy_Column, t.$CreatedOn_Column, t.$UpdatedBy_Column, t.$UpdatedOn_Column
+            SELECT t.{Opt.ColumnPrefix + Opt.KeyColumnName},
+                   t.{Opt.ColumnPrefix + Opt.TypeValueColumnName},
+                   t.{Opt.ColumnPrefix + Opt.ValueColumnName}, 
+                   t.{Opt.ColumnPrefix + Opt.CreateByColumnName},
+                   t.{Opt.ColumnPrefix + Opt.CreateOnColumnName},
+                   t.{Opt.ColumnPrefix + Opt.UpdatedByColumnName},
+                   t.{Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
             FROM {Opt.DefaultTableName} as t
             JOIN (
-                SELECT $Key_Column, MAX($UpdatedOn_Column) AS MaxDate
+                SELECT {Opt.ColumnPrefix + Opt.KeyColumnName},
+                       MAX({Opt.ColumnPrefix + Opt.UpdatedOnColumnName}) AS MaxDate
                 FROM {Opt.DefaultTableName}
-                WHERE $ValueType_Column = $ValueType_Value
-                GROUP BY $Key_Column
+                WHERE {Opt.ColumnPrefix + Opt.TypeValueColumnName} = $ValueType_Value
+                GROUP BY {Opt.ColumnPrefix + Opt.KeyColumnName}
             ) as sub
-            ON t.$Key_Column = sub.$Key_Column
-            AND t.$UpdatedOn_Column = sub.MaxDate; ";
+            ON t.{Opt.ColumnPrefix + Opt.KeyColumnName} = sub.{Opt.ColumnPrefix + Opt.KeyColumnName}
+            AND t.{Opt.ColumnPrefix + Opt.UpdatedOnColumnName} = sub.MaxDate; ";
 
         cmd.CommandText = sql;
 
