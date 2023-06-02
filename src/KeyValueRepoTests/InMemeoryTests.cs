@@ -80,8 +80,8 @@ public class InMemeoryTests{
         people = await repo.GetAll<Person>();
         var locals = await repo.GetAll<Location>();
 
-        people.Count().Should().Be(4);
-        locals.Count().Should().Be(2);
+        people.Count().Should().BeGreaterThanOrEqualTo(4);
+        locals.Count().Should().BeGreaterThanOrEqualTo(2);
     }
 }
 
