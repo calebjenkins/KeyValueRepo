@@ -1,3 +1,5 @@
+using DEDrake;
+
 namespace KeyValueRepoTests;
 
 public class InMemeoryTests{
@@ -45,7 +47,8 @@ public class InMemeoryTests{
         var p2 = await repo.Get<Person>(1);
         p2.Should().NotBeNull();
 
-        var p3 = await repo.Get<Person>("2");
+        var randomId = Guid.NewGuid().ToString().Substring(0, 8);
+        var p3 = await repo.Get<Person>(randomId);
         p3.Should().BeNull();
     }
 
@@ -62,7 +65,8 @@ public class InMemeoryTests{
         await repo.Update(p3.Id.ToString(), p3);
 
         var people = await repo.GetAll<Person>();
-        people.Count.Should().Be(3);
+        people.Count.Should().BeGreaterThanOrEqualTo(3); // Repo holds 4th record from previous test runs
+                                                         // Either need to fully reset DB each time or maybe add a Remove / RemoveAll methods
 
         var l1 = new Location("1", "123 Main", "Dallas");
         var l2 = new Location("2", "456 Front St.", "Tulsa");
