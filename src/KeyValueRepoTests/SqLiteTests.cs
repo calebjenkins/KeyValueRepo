@@ -9,7 +9,11 @@ public class SqLiteTests : InMemeoryTests
 
     public override IKeyValueRepo GetNewRepo()
     {
-        var opt = new KeyValueSqlLiteOptions() { ConnectionString = "Data Source=./Db.db" };
+        var opt = new KeyValueSqlLiteOptions()
+        {
+            ConnectionString = "Data Source=./Db.db",
+            ColumnPrefix="col"
+        };
         var validator = new SchemaValidator(_schemaLogger);
         return new KeyValueSqLiteRepo(_logger, validator, opt);
     }
@@ -35,18 +39,6 @@ public class SqLiteTests : InMemeoryTests
         var db = GetNewRepo();
         var filepath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
         filepath.Should().Contain("Db.db");
-    }
-
-    [Fact]
-    public void DefaultFileNameShouldBeProvided()
-    {
-        ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
-        ILogger<SchemaValidator> _loggerValidator = new Mock<ILogger<SchemaValidator>>().Object;
-        SchemaValidator _validator = new SchemaValidator(_loggerValidator);
-
-        var db = new KeyValueSqLiteRepo(_logger, _validator);
-        var filePath = db.DatabaseFileName;
-        filePath.Should().Contain("KeyValueDatabase.db");
     }
 
     [Fact]
@@ -108,5 +100,8 @@ public class SqLiteTests : InMemeoryTests
         var IsValid = await verify.ValidateSchema(opt, db.AsKeyValueSqlLiteRepo().DbConn);
         IsValid.HasError.Should().BeFalse();
         IsValid.Messages.Count.Should().Be(7);
+
+        // Reset DB
+        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
     }
 }

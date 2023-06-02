@@ -1,9 +1,4 @@
 ﻿
-using System.Data;
-using System.Data.Common;
-using System.Diagnostics;
-using Calebs.Extensions;
-
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public class SchemaValidator
@@ -64,10 +59,7 @@ public class SchemaValidator
 
         try
         {
-            using var connection = DbConnection;
-            connection.Open();
-
-            var command = connection.CreateCommand();
+            var command = DbConnection.CreateCommand();
             command.CommandText = sql;
 
             await command.ExecuteNonQueryAsync();
@@ -193,18 +185,20 @@ public class SchemaValidator
     }
     public static string createTableSql(string TableName, KeyValueSqlLiteOptions opt)
     {
-        // var auditColumnsSql = (!opt.UseAuditFields) ? string.Empty : $@", // We always use Audit Fields
-                   
+        // Track History: No Primary Key, so we can rely on Insert
+        // Not Tracking History, we use PKs since we're relying on constraints for Upserts
+        var primaryKey = (opt.TrackHistory) ? $@");" : $@", Primary Key ({opt.ColumnPrefix + opt.KeyColumnName}, {opt.ColumnPrefix + opt.TypeValueColumnName})
+               ) WITHOUT ROWID;";         
 
         var createTableSql = $@"
-            CREATE TABLE IF NOT EXISTS {TableName} ({opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
+            CREATE TABLE {TableName} ({opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
                     {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT NOT NULL,
-                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT,
+                    {opt.ColumnPrefix + opt.ValueColumnName} TEXT NOT NULL,
                     {opt.ColumnPrefix + opt.CreateByColumnName} TEXT,
                     {opt.ColumnPrefix + opt.CreateOnColumnName} INTEGER NOT NULL,
                     {opt.ColumnPrefix + opt.UpdatedByColumnName} TEXT,
-                    {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER NOT NULL) ; ";
-        // Primary Key ({ opt.ColumnPrefix + opt.KeyColumnName }, { opt.ColumnPrefix + opt.TypeValueColumnName }));";
+                    {opt.ColumnPrefix + opt.UpdatedOnColumnName} INTEGER NOT NULL
+                  {primaryKey}";
 
         Debug.Print($"Sql: {createTableSql} ");
 
