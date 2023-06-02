@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
-
+﻿
 namespace KeyValueRepoTests;
 
+[Collection ("RepoTests")]
 public class SqLiteTests : InMemeoryTests
 {
     ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;

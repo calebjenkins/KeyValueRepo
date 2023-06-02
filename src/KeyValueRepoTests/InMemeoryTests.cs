@@ -1,7 +1,7 @@
-using DEDrake;
 
 namespace KeyValueRepoTests;
 
+[Collection("RepoTests")]
 public class InMemeoryTests{
 
     public virtual IKeyValueRepo GetNewRepo()
