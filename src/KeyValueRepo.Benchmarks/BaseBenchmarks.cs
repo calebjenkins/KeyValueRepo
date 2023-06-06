@@ -5,15 +5,10 @@ namespace KeyValueRepo.Benchmarks;
 [RankColumn]
 public abstract class BaseBenchmarks
 {
-   
     public IKeyValueRepo? Repo { get; set; }
     private IList<Person> People = Person.TestPeople();
     private IList<Location> Places = Location.TestPlaces();
 
-    public virtual void SetUp()
-    {
-         Repo = new KeyValueInMemory();
-    }
 
     [Benchmark]
     public void ThreeWrites_OneReadOne()
