@@ -10,8 +10,6 @@ public class SQLiteBenchmarks : BaseBenchmarks
         {
             WithOptions(ConfigOptions.JoinSummary);
             var baseJob = Job.Default;
-
-            // AddJob(baseJob.
         }
     }
 

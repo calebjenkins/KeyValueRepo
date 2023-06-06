@@ -13,8 +13,6 @@ public abstract class BaseBenchmarks
     [Benchmark]
     public void ThreeWrites_OneReadOne()
     {
-      //  var repo = GetRepo();
-
         Repo?.Update(People[0].Id, People[0]);
         Repo?.Update(People[1].Id, People[1]);
         Repo?.Update(People[2].Id, People[2]);
@@ -24,8 +22,6 @@ public abstract class BaseBenchmarks
     [Benchmark]
     public void ThreeWrites_OneReadAll()
     {
-        // var repo = GetRepo();
-
         Repo?.Update(People[0].Id, People[0]);
         Repo?.Update(People[1].Id, People[1]);
         Repo?.Update(People[2].Id, People[2]);
@@ -36,8 +32,6 @@ public abstract class BaseBenchmarks
     [Benchmark]
     public void FiveWrites_TwoReads()
     {
-       // var repo = GetRepo();
-
         Repo?.Update(People[0].Id, People[0]);
         Repo?.Update(People[1].Id, People[1]);
         Repo?.Update(People[2].Id, People[2]);
@@ -53,8 +47,6 @@ public abstract class BaseBenchmarks
     [Benchmark]
     public void FiveWrites_OneReadAll()
     {
-        // var repo = GetRepo();
-
         Repo?.Update(People[0].Id, People[0]);
         Repo?.Update(Places[0].Id, Places[0]);
 
@@ -62,8 +54,7 @@ public abstract class BaseBenchmarks
         Repo?.Update(Places[1].Id, Places[1]);
 
         Repo?.Update(People[2].Id, People[2]);
-
-        
+   
         var pA = Repo?.GetAll<Person>();
     }
 }
