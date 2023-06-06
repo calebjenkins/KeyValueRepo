@@ -2,14 +2,22 @@
 namespace KeyValueRepo.Benchmarks;
 
 
-[MemoryDiagnoser]
-[Orderer(SummaryOrderPolicy.FastestToSlowest)]
-[RankColumn]
-public class InMemoryBenchmarks: KeyValueBaseBenchmarks
+[Config(typeof(Config))]
+public class InMemoryBenchmarks : BaseBenchmarks
 {
-    [GlobalSetup(Target = nameof(InMemoryBenchmarks))]
-    public override void SetUp()
+    public InMemoryBenchmarks()
     {
         Repo = new KeyValueInMemory();
+    }
+
+    private class Config : ManualConfig
+    {
+        public Config()
+        {
+            WithOptions(ConfigOptions.JoinSummary);
+            var baseJob = Job.Default;
+
+            // AddJob(baseJob.
+        }
     }
 }

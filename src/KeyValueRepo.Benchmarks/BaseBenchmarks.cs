@@ -1,7 +1,11 @@
-﻿namespace KeyValueRepo.Benchmarks;
+﻿
+namespace KeyValueRepo.Benchmarks;
 
-public abstract class KeyValueBaseBenchmarks
+[MemoryDiagnoser]
+[RankColumn]
+public abstract class BaseBenchmarks
 {
+   
     public IKeyValueRepo? Repo { get; set; }
     private IList<Person> People = Person.TestPeople();
     private IList<Location> Places = Location.TestPlaces();

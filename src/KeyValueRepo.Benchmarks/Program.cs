@@ -1,11 +1,13 @@
 ﻿namespace KeyValueRepo.Benchmarks;
 
-[Config(typeof(BenchmarkConfig))]
+
 public class Program
 {
-    private static void Main(string[] args)
-    {
-        BenchmarkRunner.Run<InMemoryBenchmarks>();
-        BenchmarkRunner.Run<SQLiteBenchmarks>();
-    }
+    //private static void Main(string[] args)
+    //{
+    //    BenchmarkRunner.Run<InMemoryBenchmarks>();
+    //    BenchmarkRunner.Run<SQLiteBenchmarks>();
+    //}
+    public static void Main(string[] args) =>
+    BenchmarkSwitcher.FromAssemblies(new[] { typeof(Program).Assembly }).Run(args);
 }

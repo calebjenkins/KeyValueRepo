@@ -1,7 +1,10 @@
 ﻿global using Calebs.Data.KeyValueRepo;
 global using Calebs.Data.KeyValueRepo.SqlLite;
-global using BenchmarkDotNet;
+global using Calebs.Extensions;
 global using BenchmarkDotNet.Attributes;
 global using BenchmarkDotNet.Order;
 global using BenchmarkDotNet.Running;
+global using BenchmarkDotNet.Configs;
+global using BenchmarkDotNet.Jobs;
 global using Moq;
+global using Microsoft.Extensions.Logging;

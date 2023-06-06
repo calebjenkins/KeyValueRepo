@@ -1,26 +1,32 @@
-﻿using BenchmarkDotNet.Attributes;
-using Calebs.Extensions;
-using Microsoft.Extensions.Logging;
-
+﻿
 namespace KeyValueRepo.Benchmarks;
 
-[MemoryDiagnoser]
-[Orderer(SummaryOrderPolicy.FastestToSlowest)]
-[RankColumn]
-public class SQLiteBenchmarks : KeyValueBaseBenchmarks
+[Config(typeof(Config))]
+public class SQLiteBenchmarks : BaseBenchmarks
 {
-    [GlobalSetup (Target = nameof(SQLiteBenchmarks))]
-    public override void SetUp()
+    private class Config : ManualConfig
+    {
+        public Config()
+        {
+            WithOptions(ConfigOptions.JoinSummary);
+            var baseJob = Job.Default;
+
+            // AddJob(baseJob.
+        }
+    }
+
+    [GlobalSetup]
+    public void SetUpSQLiteBenchmarks()
     {
         var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
         var vLogger = new Mock<ILogger<SchemaValidator>>().Object;
         var kvLogger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
         var validator = new SchemaValidator(vLogger);
 
-        Repo = new KeyValueSqLiteRepo(kvLogger, validator, opt);
+         Repo = new KeyValueSqLiteRepo(kvLogger, validator, opt);
     }
 
-    [GlobalCleanup(Target = nameof(SQLiteBenchmarks))]
+    [GlobalCleanup]
     public async Task CleanUp()
     {
         var pathToFile = Repo?.AsKeyValueSqlLiteRepo().DatabaseFileName;
