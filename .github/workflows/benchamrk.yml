@@ -31,18 +31,18 @@ jobs:
        
         # We can't do a joined report, because that always puts the timestamp on the file name
         # running them seperately is how we know what the file name will be. 
-      - name: Run SQLite Benchmarks
-        run: dotnet ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.SQLiteBenchmarks.*"
-        
       - name: Run InMemory Benchmarks
         run: dotnet ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.InMemoryBenchmarks.*"
 
+      - name: Run SQLite Benchmarks
+        run: dotnet ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.SQLiteBenchmarks.*"
+        
       - name: Check benchmark result - InMemory
         uses: rhysd/github-action-benchmark@v1
         with:
             name: Benchmark.Net Benchmark
             tool: 'benchmarkdotnet'
-            output-file-path: ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
+            output-file-path: '/src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json'
             github-token: ${{ secrets.GITHUB_TOKEN }}
             auto-push: true
             # Show alert with commit comment on detecting possible performance regression
@@ -56,7 +56,7 @@ jobs:
         with:
             name: Benchmark.Net Benchmark
             tool: 'benchmarkdotnet'
-            output-file-path: ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
+            output-file-path: '/src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json'
             github-token: ${{ secrets.GITHUB_TOKEN }}
             auto-push: true
             # Show alert with commit comment on detecting possible performance regression
@@ -70,7 +70,7 @@ jobs:
         with:
             name: Store Benchmark.Net Results
             tool: 'benchmarkdotnet'
-            output-file-path: ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
+            output-file-path: '/src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json'
             github-token: ${{ secrets.GITHUB_TOKEN }}
             auto-push: true
             # Show alert with commit comment on detecting possible performance regression
@@ -85,7 +85,7 @@ jobs:
         with:
             name: Store Benchmark.Net Results
             tool: 'benchmarkdotnet'
-            output-file-path: ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
+            output-file-path: '/src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json'
             github-token: ${{ secrets.GITHUB_TOKEN }}
             auto-push: true
             # Show alert with commit comment on detecting possible performance regression
