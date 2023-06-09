@@ -1,0 +1,97 @@
+name: Benchmarks for KeyValueRepo
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: write
+  deployments: write
+
+jobs:
+  benchmark:
+    name: Run Benchmark.Net
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+            dotnet-version: '7.0.x'
+
+      - name: Build
+        run: dotnet build --configuration Release
+       
+        # We can't do a joined report, because that always puts the timestamp on the file name
+        # running them seperately is how we know what the file name will be. 
+      - name: Run SQLite Benchmarks
+        run: dotnet /src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.SQLiteBenchmarks.*"
+        
+      - name: Run InMemory Benchmarks
+        run: dotnet /src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.InMemoryBenchmarks.*"
+
+      - name: Check benchmark result - InMemory
+        uses: rhysd/github-action-benchmark@v1
+        with:
+            name: Benchmark.Net Benchmark
+            tool: 'benchmarkdotnet'
+            output-file-path: /BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            auto-push: true
+            # Show alert with commit comment on detecting possible performance regression
+            alert-threshold: '200%'
+            comment-on-alert: true
+            fail-on-alert: true
+            alert-comment-cc-users: '@calebjenkins'
+
+      - name: Check benchmark result - SQLite
+        uses: rhysd/github-action-benchmark@v1
+        with:
+            name: Benchmark.Net Benchmark
+            tool: 'benchmarkdotnet'
+            output-file-path: /BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.SQLiteBenchmarks-report-full-compressed.json
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            auto-push: true
+            # Show alert with commit comment on detecting possible performance regression
+            alert-threshold: '200%'
+            comment-on-alert: true
+            fail-on-alert: true
+            alert-comment-cc-users: '@calebjenkins'
+
+      - name: Store benchmark result (InMemory) - separate results repo
+        uses: rhysd/github-action-benchmark@v1
+        with:
+            name: Store Benchmark.Net Results
+            tool: 'benchmarkdotnet'
+            output-file-path: /BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            auto-push: true
+            # Show alert with commit comment on detecting possible performance regression
+            alert-threshold: '200%'
+            comment-on-alert: true
+            fail-on-alert: true
+            alert-comment-cc-users: '@calebjenkins'
+            gh-repository: 'github.com/calebjenkins/KeyValueRepo'
+
+      - name: Store benchmark result (SQLite) - separate results repo
+        uses: rhysd/github-action-benchmark@v1
+        with:
+            name: Store Benchmark.Net Results
+            tool: 'benchmarkdotnet'
+            output-file-path: /BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.SQLiteBenchmarks-report-full-compressed.json
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            auto-push: true
+            # Show alert with commit comment on detecting possible performance regression
+            alert-threshold: '200%'
+            comment-on-alert: true
+            fail-on-alert: true
+            alert-comment-cc-users: '@calebjenkins'
+            gh-repository: 'github.com/calebjenkins/KeyValueRepo'
+            # gh-repository: 'github.com/calebjenkins/KeyValueRepo-Benchmark-Results'
