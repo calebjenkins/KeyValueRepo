@@ -32,10 +32,10 @@ jobs:
         # We can't do a joined report, because that always puts the timestamp on the file name
         # running them seperately is how we know what the file name will be. 
       - name: Run SQLite Benchmarks
-        run: dotnet /src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.SQLiteBenchmarks.*"
+        run: dotnet ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.SQLiteBenchmarks.*"
         
       - name: Run InMemory Benchmarks
-        run: dotnet /src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.InMemoryBenchmarks.*"
+        run: dotnet ./src/KeyValueRepo.Benchmarks/bin/Release/net7.0/KeyValueRepo.Benchmarks.dll --exporters json --filter "KeyValueRepo.Benchmarks.InMemoryBenchmarks.*"
 
       - name: Check benchmark result - InMemory
         uses: rhysd/github-action-benchmark@v1
