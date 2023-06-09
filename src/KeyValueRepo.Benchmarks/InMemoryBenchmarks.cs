@@ -9,15 +9,4 @@ public class InMemoryBenchmarks : BaseBenchmarks
     {
         Repo = new KeyValueInMemory();
     }
-
-    private class Config : ManualConfig
-    {
-        public Config()
-        {
-            WithOptions(ConfigOptions.JoinSummary);
-            var baseJob = Job.Default;
-
-            // AddJob(baseJob.
-        }
-    }
 }

@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{BBC36D7D-AFFC-4461-896C-FD6DCCC4EF90}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\benchamrk.yml = .github\workflows\benchamrk.yml
 		.github\workflows\dev-ci.yml = .github\workflows\dev-ci.yml
 		.github\workflows\main-publish.yml = .github\workflows\main-publish.yml
 		.github\workflows\working-branches.yml = .github\workflows\working-branches.yml
@@ -26,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueSqlLiteRepo", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepoTests", "src\KeyValueRepoTests\KeyValueRepoTests.csproj", "{CDC1E510-A04E-4854-924F-EAD2D81F6411}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyValueRepo.Benchmarks", "src\KeyValueRepo.Benchmarks\KeyValueRepo.Benchmarks.csproj", "{AC234450-6779-4916-92E6-DF39459273A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepo.Benchmarks", "src\KeyValueRepo.Benchmarks\KeyValueRepo.Benchmarks.csproj", "{AC234450-6779-4916-92E6-DF39459273A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

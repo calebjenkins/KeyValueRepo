@@ -4,15 +4,6 @@ namespace KeyValueRepo.Benchmarks;
 [Config(typeof(Config))]
 public class SQLiteBenchmarks : BaseBenchmarks
 {
-    private class Config : ManualConfig
-    {
-        public Config()
-        {
-            WithOptions(ConfigOptions.JoinSummary);
-            var baseJob = Job.Default;
-        }
-    }
-
     [GlobalSetup]
     public void SetUpSQLiteBenchmarks()
     {

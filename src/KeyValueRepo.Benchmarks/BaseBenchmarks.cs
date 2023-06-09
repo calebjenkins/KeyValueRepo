@@ -1,6 +1,7 @@
 ﻿
 namespace KeyValueRepo.Benchmarks;
 
+[KeepBenchmarkFiles]
 [MemoryDiagnoser]
 [RankColumn]
 public abstract class BaseBenchmarks
