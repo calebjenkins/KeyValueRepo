@@ -29,6 +29,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepoTests", "src\Ke
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepo.Benchmarks", "src\KeyValueRepo.Benchmarks\KeyValueRepo.Benchmarks.csproj", "{AC234450-6779-4916-92E6-DF39459273A3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3BDF6ABA-E0CA-4A98-8D50-102B57D6E4E8}"
+	ProjectSection(SolutionItems) = preProject
+		docs\index.md = docs\index.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +66,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BBC36D7D-AFFC-4461-896C-FD6DCCC4EF90} = {4974A6F1-55EA-4DD6-A20E-1D93120A34B9}
+		{3BDF6ABA-E0CA-4A98-8D50-102B57D6E4E8} = {4974A6F1-55EA-4DD6-A20E-1D93120A34B9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3769E554-6091-4F35-A13B-6F4F14727780}
