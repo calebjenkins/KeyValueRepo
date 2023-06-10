@@ -42,7 +42,7 @@ jobs:
         with:
             name: Benchmark.Net Benchmark
             tool: 'benchmarkdotnet'
-            output-file-path: '/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json'
+            output-file-path: BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
             github-token: ${{ secrets.GITHUB_TOKEN }}
             auto-push: true
             # Show alert with commit comment on detecting possible performance regression
@@ -50,14 +50,13 @@ jobs:
             comment-on-alert: true
             fail-on-alert: true
             alert-comment-cc-users: '@calebjenkins'
-            continue-on-error: true
 
       - name: Check benchmark result - SQLite
         uses: rhysd/github-action-benchmark@v1
         with:
             name: Benchmark.Net Benchmark
             tool: 'benchmarkdotnet'
-            output-file-path: 'src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json'
+            output-file-path: src/KeyValueRepo.Benchmarks/bin/Release/net7.0/BenchmarkDotNet.Artifacts/results/KeyValueRepo.Benchmarks.InMemoryBenchmarks-report-full-compressed.json
             github-token: ${{ secrets.GITHUB_TOKEN }}
             auto-push: true
             # Show alert with commit comment on detecting possible performance regression
@@ -65,7 +64,6 @@ jobs:
             comment-on-alert: true
             fail-on-alert: true
             alert-comment-cc-users: '@calebjenkins'
-            continue-on-error: true
 
       - name: Store benchmark result (InMemory) - separate results repo
         uses: rhysd/github-action-benchmark@v1
