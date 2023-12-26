@@ -1,4 +1,7 @@
 ﻿
+using Xunit.Abstractions;
+using Xunit.Sdk;
+
 namespace KeyValueRepoTests;
 
 [Collection ("RepoTests")]
@@ -6,16 +9,26 @@ public class SqLiteTests : InMemeoryTests
 {
     ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
     ILogger<SchemaValidator> _schemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
+    ITestOutputHelper _out;
 
-    public override IKeyValueRepo GetNewRepo()
+    public SqLiteTests(ITestOutputHelper output)
+    {
+        _out = output ?? throw new ArgumentNullException(nameof(output));
+    }
+
+    public IKeyValueRepo GetNewRepo(string path)
     {
         var opt = new KeyValueSqlLiteOptions()
         {
-            ConnectionString = "Data Source=./Db.db",
-            ColumnPrefix="col"
+            ConnectionString = path,
+            ColumnPrefix = "col"
         };
         var validator = new SchemaValidator(_schemaLogger);
         return new KeyValueSqLiteRepo(_logger, validator, opt);
+    }
+    public override IKeyValueRepo GetNewRepo()
+    {
+        return GetNewRepo("Data Source=./Db.db");
     }
 
     [Fact]
@@ -76,11 +89,19 @@ public class SqLiteTests : InMemeoryTests
     [Fact]
     public async Task ConfirmTableDoesNotExistAndCanBeCreated()
     {
-        var db = GetNewRepo();
+        var tmpData = Guid.NewGuid().ToString().Substring(0, 5);
+        var db = GetNewRepo($"Data Source=./{tmpData}.db");
         var filePath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
 
         // Reset DB
-        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
+        try
+        {
+            await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
+        }
+        catch (IOException ex)
+        {
+            _out.WriteLine(ex.ToString());
+        }
 
         var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
         var defaultTableName = opt.DefaultTableName;
