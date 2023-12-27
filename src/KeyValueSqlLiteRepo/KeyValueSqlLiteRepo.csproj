@@ -9,7 +9,7 @@
 	  <Version>0.1.0</Version>
 	  <Configurations>Debug;Release;</Configurations>
 	  
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Caleb Jenkins</Authors>
 		<Company>Caleb Jenkins</Company>
 		<Description>a SQLite implementation of the KeyValueRepo abstraction for KeyValue data stores.</Description>
