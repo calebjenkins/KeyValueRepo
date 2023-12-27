@@ -80,7 +80,7 @@ jobs:
             comment-on-alert: true
             fail-on-alert: true
             alert-comment-cc-users: '@calebjenkins'
-            gh-repository: 'github.com/calebjenkins/KeyValueRepo-Benchmark-Results'
+            # gh-repository: 'github.com/calebjenkins/KeyValueRepo-Benchmark-Results'
 
       - name: Store benchmark result (SQLite) - separate results repo
         uses: rhysd/github-action-benchmark@v1
@@ -95,4 +95,4 @@ jobs:
             comment-on-alert: true
             fail-on-alert: true
             alert-comment-cc-users: '@calebjenkins'
-            gh-repository: 'github.com/calebjenkins/KeyValueRepo-Benchmark-Results'
+            # gh-repository: 'github.com/calebjenkins/KeyValueRepo-Benchmark-Results'
