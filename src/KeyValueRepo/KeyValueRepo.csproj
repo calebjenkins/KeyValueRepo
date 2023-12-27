@@ -28,7 +28,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Calebs.Extensions" Version="1.2.0-ci-39" />
+		<PackageReference Include="Calebs.Extensions" Version="1.5.0-ci-62" />
 		<None Include="..\..\LICENSE">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>

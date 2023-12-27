@@ -1,6 +1,10 @@
 global using Xunit;
+global using Xunit.Abstractions;
 global using FluentAssertions;
 global using Calebs.Data.KeyValueRepo;
+global using Moq;
+global using Microsoft.Extensions.Logging;
+global using System.Diagnostics;
 
 // nuget tests are on hold moving from 0.1.0 to 0.2.0
 // These are breaking changes from exisisting nuget package moving to Task Async
