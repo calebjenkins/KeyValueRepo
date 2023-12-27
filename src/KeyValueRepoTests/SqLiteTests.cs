@@ -92,14 +92,7 @@ public class SqLiteTests : InMemeoryTests
         var filePath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
 
         // Reset DB
-        try
-        {
-            await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
-        }
-        catch (IOException ex)
-        {
-            _out.WriteLine(ex.ToString());
-        }
+        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
 
         var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
         var defaultTableName = opt.DefaultTableName;
