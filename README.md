@@ -46,7 +46,7 @@ The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET S
 - 0.2.0 - added SqlLite Implementation
 ### Future Goals
 ---
-- Sql Lite Nuget Package
+- SqlLite Nuget Package
 - New Feature: KV Meta Objects
 - New Repo: Sql Server Implementation
 - New Repo: Azure Tables Implementation
