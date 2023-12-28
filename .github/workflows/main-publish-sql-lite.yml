@@ -99,7 +99,7 @@ jobs:
             if: ${{ (github.ref == 'refs/heads/main') && ((github.event.inputs.PublishNuget == true) && (!contains(github.event.pull_request.title, 'no-publish'))) }}
             # if: ${{ github.event.inputs.PublishNuget == 'true'}}
             # run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
-            run: dotnet nuget push Calebs.KeyValueSqlLiteRepo.${{steps.get_version.outputs.RELEASE_VERSION}}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
+            run: dotnet nuget push Calebs.KeyValueRepo.SQLite.${{steps.get_version.outputs.RELEASE_VERSION}}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
 
 
  
