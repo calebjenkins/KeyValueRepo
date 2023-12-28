@@ -39,3 +39,15 @@ The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET S
 - Update<T>(string Id, T object)
 - Update<T>(int Id, T object) => Update(string Id, T object)
     - Note This method has a _default implementation_ that performs a `ToSTring()` on the int Id and calls the `Update<T>(string Id, T object)` method.
+
+
+## Release History & Development Goals
+- 0.1.0 - initial release (in Memory)
+- 0.2.0 - added SqlLite Implementation
+### Future Goals
+---
+- SqlLite Nuget Package
+- New Feature: KV Meta Objects
+- New Repo: Sql Server Implementation
+- New Repo: Azure Tables Implementation
+- New Repo: Azure CosmoDB Implementation
