@@ -32,7 +32,7 @@ public class InMemeoryTests{
     public async Task ShouldReturnVoidForUnknownTypes()
     {
         IKeyValueRepo repo = GetNewRepo();
-        var p = await repo.Get<Person>("1");
+        var p = await repo.Get<UnusedType>("1");
 
         p.Should().BeNull();
     }
@@ -87,3 +87,5 @@ public class InMemeoryTests{
 
 public record Person (string First, string Last, int Id);
 public record Location (string Id, string Street, string City);
+
+public record UnusedType();

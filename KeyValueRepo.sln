@@ -15,7 +15,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{BBC36D7D-AFFC-4461-896C-FD6DCCC4EF90}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\benchamrk.yml = .github\workflows\benchamrk.yml
+		.github\workflows\dev-ci-sql-lite.yml = .github\workflows\dev-ci-sql-lite.yml
 		.github\workflows\dev-ci.yml = .github\workflows\dev-ci.yml
+		.github\workflows\main-publish-sql-lite.yml = .github\workflows\main-publish-sql-lite.yml
 		.github\workflows\main-publish.yml = .github\workflows\main-publish.yml
 		.github\workflows\working-branches.yml = .github\workflows\working-branches.yml
 	EndProjectSection

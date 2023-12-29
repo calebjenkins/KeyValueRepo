@@ -2,6 +2,7 @@ global using Xunit;
 global using Xunit.Abstractions;
 global using FluentAssertions;
 global using Calebs.Data.KeyValueRepo;
+global using Calebs.Data.KeyValueRepo.SqlLite;
 global using Moq;
 global using Microsoft.Extensions.Logging;
 global using System.Diagnostics;
