@@ -72,7 +72,7 @@ jobs:
             if: ${{ steps.detect_develop.outcome == 'failure' }}
 
           - name: Pack
-            run: dotnet pack --configuration Release /p:Version=${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER} --include-symbols  --output .
+            run: dotnet pack src/KeyValueSqlLiteRepo/KeyValueSqlLiteRepo.csproj --configuration Release -p:PackageVersion=${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER} --include-symbols  --output .
             if: ${{ steps.detect_develop.outcome == 'success' }}
 
 
