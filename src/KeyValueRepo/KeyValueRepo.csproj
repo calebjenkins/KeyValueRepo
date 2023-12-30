@@ -22,8 +22,8 @@
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageId>Calebs.KeyValueRepo</PackageId>
-		<PackageIconUrl />
 		<PackageIcon>KeyValueRepoLogo.png</PackageIcon>
+		<PackageIconUrl />
 		<Product>Calebs.KeyValueRepo</Product>
 		<Title>KeyValueRepo</Title>
 	</PropertyGroup>
