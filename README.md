@@ -1,4 +1,6 @@
 ﻿# KeyValueRepo
+![KeyValueRepo Logo](./assets/logo/KeyValueRepoLogo.png)
+
 [![.github/workflows/dev-ci.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml/badge.svg?branch=develop)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml)
 [![.github/workflows/main-publish.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml/badge.svg?branch=main)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml)
 [![NuGet](https://img.shields.io/nuget/dt/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo) 

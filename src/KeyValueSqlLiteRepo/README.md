@@ -1,4 +1,6 @@
 ﻿# KeyValueRepo.SQLite
+![KeyValueRepo Logo](/assets/logo/KeyValueRepoLogo.png)
+
 [![.github/workflows/dev-ci-sql-lite.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci-sql-lite.yml/badge.svg?branch=develop)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml)
 [![.github/workflows/main-publish-sql-lite.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml/badge.svg?branch=main)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish-sql-lite.yml)
 [![NuGet](https://img.shields.io/nuget/dt/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo.SQLite) 
