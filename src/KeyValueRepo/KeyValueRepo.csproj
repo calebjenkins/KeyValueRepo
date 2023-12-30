@@ -23,12 +23,17 @@
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageId>Calebs.KeyValueRepo</PackageId>
 		<PackageIconUrl />
+		<PackageIcon>KeyValueRepoLogo.png</PackageIcon>
 		<Product>Calebs.KeyValueRepo</Product>
 		<Title>KeyValueRepo</Title>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Calebs.Extensions" Version="1.5.0-ci-62" />
+		<None Include="..\..\assets\logo\KeyValueRepoLogo.png">
+      		<Pack>True</Pack>
+      		<PackagePath></PackagePath>
+    	</None>
 		<None Include="..\..\LICENSE">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
