@@ -1,25 +1,25 @@
-﻿# KeyValueRepo.SQLite
+﻿# KeyValueRepo
 ![KeyValueRepo Logo](https://raw.githubusercontent.com/calebjenkins/KeyValueRepo/develop/assets/logo/KeyValueRepoLogo.png)
 
-[![.github/workflows/dev-ci-sql-lite.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci-sql-lite.yml/badge.svg?branch=develop)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml)
-[![.github/workflows/main-publish-sql-lite.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml/badge.svg?branch=main)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish-sql-lite.yml)
-[![NuGet](https://img.shields.io/nuget/dt/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo.SQLite) 
-[![NuGet](https://img.shields.io/nuget/vpre/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo.SQLite)
+[![.github/workflows/dev-ci.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml/badge.svg?branch=develop)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/dev-ci.yml)
+[![.github/workflows/main-publish.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml/badge.svg?branch=main)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/main-publish.yml)
+[![NuGet](https://img.shields.io/nuget/dt/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo) 
+[![NuGet](https://img.shields.io/nuget/vpre/calebs.keyvaluerepo.svg)](https://www.nuget.org/packages/Calebs.KeyValueRepo)
 [![.github/workflows/working-branches.yml](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/working-branches.yml/badge.svg)](https://github.com/calebjenkins/KeyValueRepo/actions/workflows/working-branches.yml)
 
-A SqlLite implementation of a generic the KeyValueRepo interface for Key Value storage operations. Ideal for simple key-values that might migrate to SQL Server or NoSQL - a quick and easy way to create a KeyValue store.
+A generic interface for Key Value storage operations. Ideal for simple key-values that might migrate across in memory, SQL Server or NoSQL - a quick and easy way to create a KeyValue store.
 
 By default, this library ships with an in-memory implementation. `KeyValueInMemory` which implements the `IKeyValueRepo` interface.
 
 ## Installing KeyValueRepo
 
-You should install the KeyValueRepo [with NuGet](https://www.nuget.org/packages/Calebs.KeyValueRepo.SQLite):
+You should install the KeyValueRepo [with NuGet](https://www.nuget.org/packages/Calebs.KeyValueRepo):
 
-    Install-Package Calebs.KeyValueRepo.SQLite
+    Install-Package Calebs.KeyValueRepo
     
 Or via the .NET Core command line interface:
 
-    dotnet add package Calebs.KeyValueRepo.SQLite
+    dotnet add package Calebs.KeyValueRepo
 
 Either command, from Package Manager Console or .NET Core CLI, will download and install Calebs.KeyValueRepo and all required dependencies.
 
@@ -29,7 +29,7 @@ Either command, from Package Manager Console or .NET Core CLI, will download and
 - Merged PRs to `Main` will trigger a [version] deployment to nuget, assuming all of the tests pass.
 
 ## Versioning
-The package `version` is defined in the `KeyValueSqlLiteRepo.csproj` file, using .NET SDK style structure. We follow `semantic versioning` for this package. Implementations should match Major releases with KeyValueRepo package.
+The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET SDK style structure. We follow `semantic versioning` for this package.
 
 
 ## Methods in IKeyValueRepo
@@ -49,8 +49,7 @@ The package `version` is defined in the `KeyValueSqlLiteRepo.csproj` file, using
 - ✔ SQLite [Nuget Package](https://www.nuget.org/packages/Calebs.KeyValueRepo.SQLite/)
 ### Future Goals
 ---
-- New Feature: KVR Meta Objects
-- New Feature: Base Unit Tests via Nuget
-- New Repo: Azure Tables Implementation
+- New Feature: KV Meta Objects
 - New Repo: Sql Server Implementation
+- New Repo: Azure Tables Implementation
 - New Repo: Azure CosmoDB Implementation

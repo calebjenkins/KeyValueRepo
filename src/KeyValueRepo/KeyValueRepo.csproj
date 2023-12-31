@@ -15,7 +15,7 @@
 		<Copyright>Copyright Caleb Jenkins</Copyright>
 		<PackageProjectUrl>https://github.com/calebjenkins/</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/calebjenkins/KeyValueRepo</RepositoryUrl>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageReadmeFile>Nuget-Readme.md</PackageReadmeFile>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>KeyValue;Data</PackageTags>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -38,7 +38,7 @@
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
-		<None Include="..\..\README.md">
+		<None Include=".\Nuget-Readme.md">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>

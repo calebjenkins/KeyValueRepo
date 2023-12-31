@@ -13,7 +13,7 @@ By default, this library ships with an in-memory implementation. `KeyValueInMemo
 
 ## Installing KeyValueRepo
 
-You should install [Extensions with NuGet](https://www.nuget.org/packages/Calebs.KeyValueRepo):
+You should install the KeyValueRepo [with NuGet](https://www.nuget.org/packages/Calebs.KeyValueRepo):
 
     Install-Package Calebs.KeyValueRepo
     
