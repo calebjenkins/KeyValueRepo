@@ -1,13 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Configurations>Debug;Release;</Configurations>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Calebs.Data.KeyValueRepoTests</RootNamespace>
+		<AssemblyName>Calebs.KeyValueRepoTests</AssemblyName>
+		<Version>0.3.0</Version>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Caleb Jenkins</Authors>
+		<Company>Caleb Jenkins</Company>
+		<Description>a set of tests that all IKeyValueRepo implementations should pass.</Description>
+		<Copyright>Copyright Caleb Jenkins</Copyright>
+		<PackageProjectUrl>https://github.com/calebjenkins/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/calebjenkins/KeyValueRepo</RepositoryUrl>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>KeyValue;Data;Testing</PackageTags>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageId>Calebs.KeyValueRepoTests</PackageId>
+		<PackageIcon>KeyValueRepoLogo.png</PackageIcon>
+		<PackageIconUrl />
+		<Product>Calebs.KeyValueRepoTests</Product>
+		<Title>KeyValueRepoTests</Title>
+	</PropertyGroup>
+		
   <ItemGroup>
     <Compile Remove="_Data\**" />
     <EmbeddedResource Remove="_Data\**" />

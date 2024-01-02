@@ -49,7 +49,9 @@ The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET S
 - ✔ SQLite [Nuget Package](https://www.nuget.org/packages/Calebs.KeyValueRepo.SQLite/)
 ### Future Goals
 ---
-- New Feature: KV Meta Objects
-- New Repo: Sql Server Implementation
+- In Progress: 0.3.0 - New Feature: KV Meta Objects
+- In Progress: Seperate and publish base unit tests
+- Consider: Adding Remove (id) and RemoveAll methods
 - New Repo: Azure Tables Implementation
+- New Repo: Sql Server Implementation
 - New Repo: Azure CosmoDB Implementation

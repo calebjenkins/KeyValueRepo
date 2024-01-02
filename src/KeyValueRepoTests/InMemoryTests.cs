@@ -1,5 +1,4 @@
 
-namespace KeyValueRepoTests;
 
 [Collection("RepoTests")]
 public class InMemoryTests{

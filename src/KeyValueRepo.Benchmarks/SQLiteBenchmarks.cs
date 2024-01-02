@@ -20,7 +20,7 @@ public class SQLiteBenchmarks : BaseBenchmarks
     {
         var pathToFile = Repo?.AsKeyValueSqlLiteRepo().DatabaseFileName;
 
-        if (pathToFile.IsNotNullOrEmpty())
+        if (pathToFile.IsNotNullOrEmpty() && Repo != null)
         {
             await Repo.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
             File.Delete(pathToFile.ValueOrEmpty());
