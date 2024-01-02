@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KeyValueRepo\KeyValueRepo.csproj" />
     <ProjectReference Include="..\KeyValueSqlLiteRepo\KeyValueSqlLiteRepo.csproj" />
   </ItemGroup>
 

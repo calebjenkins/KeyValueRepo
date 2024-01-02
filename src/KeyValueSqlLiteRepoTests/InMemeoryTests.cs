@@ -1,8 +1,11 @@
 
-namespace KeyValueRepoTests;
+using Calebs.Data.KeyValueRepo;
+using FluentAssertions;
+
+namespace KeyValueSqlLiteRepoTests;
 
 [Collection("RepoTests")]
-public class InMemeoryTests{
+public class KeyValueBaseTests{
 
     public virtual IKeyValueRepo GetNewRepo()
     {

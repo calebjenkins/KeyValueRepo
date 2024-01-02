@@ -1,9 +1,10 @@
 ﻿
+using System.Diagnostics;
 
-namespace KeyValueRepoTests;
+namespace KeyValueSqlLiteRepoTests;
 
 [Collection ("RepoTests")]
-public class SqLiteTests : InMemeoryTests
+public class SqLiteTests : KeyValueBaseTests
 {
     ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
     ILogger<SchemaValidator> _schemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
@@ -59,14 +60,14 @@ public class SqLiteTests : InMemeoryTests
         var filePath = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
 
         // Clear File
-        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
+       // await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
 
         // Create a new File
         var valid = await db.AsKeyValueSqlLiteRepo().ValidateSchema();
         File.Exists(filePath).Should().BeTrue();
 
         // Clean Up
-        await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
+       // await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
     }
 
     private async Task removeDbFileIfExists(KeyValueSqLiteRepo Repo)

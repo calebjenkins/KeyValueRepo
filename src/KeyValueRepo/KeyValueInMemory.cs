@@ -1,5 +1,4 @@
-﻿namespace Calebs.Data.KeyValueRepo;
-
+﻿
 public class KeyValueInMemory : IKeyValueRepo
 {
     // Note a lot of "await Task.Run(".. etc in here, since this is InMemory, Tasks/Await not really needed, but the interface is designed for networked databases where that is generally preffered. 
@@ -14,11 +13,10 @@ public class KeyValueInMemory : IKeyValueRepo
         {
             if(_data[typeKey].ContainsKey(key))
             {
-                T? data = _data[typeKey][key].FromJson<T>();
+                var data = _data[typeKey][key].FromJson<MetaObject<T>>()?.Value;
                 return await Task.FromResult<T?>(data);
             }
         }
-
         return null;
     }
 
@@ -34,8 +32,11 @@ public class KeyValueInMemory : IKeyValueRepo
             {
                 if (_data[typeKey].ContainsKey(key))
                 {
-                    T? data = _data[typeKey][key].FromJson<T>();
-                    list.Add(data);
+                    var data = _data[typeKey][key].FromJson<MetaObject<T>>().Value;
+                    if (data != null)
+                    {
+                        list.Add(data);
+                    }
                 }
             }
         }
@@ -43,15 +44,64 @@ public class KeyValueInMemory : IKeyValueRepo
         return await Task.FromResult<IList<T>>(list);
     }
 
-    public async Task Update<T>(string key, T value) where T : class
+    public async Task<IList<MetaObject<T>>?> GetHistory<T>(string key) where T : class
     {
         string typeKey = typeof(T).ToString();
+
+        var list = new List<MetaObject<T>>();
+
+        if (_data.ContainsKey(typeKey))
+        {
+            var keys = _data[typeKey].Keys;
+            foreach (var k in keys)
+            {
+                if (_data[typeKey].ContainsKey(k))
+                {
+                    var data = _data[typeKey][k].FromJson<MetaObject<T>>();
+                    list.Add(data);
+                }
+            }
+        }
+
+        return await Task.FromResult<IList<MetaObject<T>>>(list);
+    }
+
+    public async Task<MetaObject<T>?> GetMeta<T>(string key) where T : class
+    {
+        string typeKey = typeof(T).ToString();
+
+        if (_data.ContainsKey(typeKey))
+        {
+            if (_data[typeKey].ContainsKey(key))
+            {
+                var data = _data[typeKey][key].FromJson<MetaObject<T>>();
+                return await Task.FromResult(data);
+            }
+        }
+        return null;
+    }
+
+    public async Task Update<T>(string key, T value) where T : class
+    {
+        var ident = Thread.CurrentPrincipal?.Identity?.Name ?? "";
+        var now = DateTime.Now;
+
+        string typeKey = typeof(T).ToString();
+        var mo = new MetaObject<T>()
+        {
+            Value = value,
+            CreatedBy = ident,
+            CreatedOn = now,
+            UpdatedBy = ident,
+            UpdatedOn = now
+        };
 
         // Create type dictionary if does now exist
         if (!_data.ContainsKey(typeKey))
         {
             var newDict = new Dictionary<string, string>();
-            newDict.Add(key, value.ToJson());
+            //newDict.Add(key, value.ToJson());
+            newDict.Add(key, mo.ToJson());
 
             await Task.Run(() =>
             {
@@ -64,14 +114,20 @@ public class KeyValueInMemory : IKeyValueRepo
         {
             await Task.Run(() =>
             {
-                _data[typeKey].Add(key, value.ToJson());
+                // _data[typeKey].Add(key, value.ToJson());
+                _data[typeKey].Add(key, mo.ToJson());
             });
         }
         else
         {
             await Task.Run(() =>
             {
-                _data[typeKey][key] = value.ToJson();
+                var existingData = _data[typeKey][key].FromJson<MetaObject<T>>();
+                existingData.CreatedBy = mo.CreatedBy;
+                existingData.CreatedOn = mo.CreatedOn;
+                existingData.Value = mo.Value;
+
+                _data[typeKey][key] = existingData.ToJson();
             });
         }
     }
