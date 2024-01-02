@@ -1,11 +1,35 @@
 
 
+using System.Security.Principal;
+
 [Collection("RepoTests")]
 public class InMemoryTests{
 
     public virtual IKeyValueRepo GetNewRepo()
     {
         return new KeyValueInMemory();
+    }
+
+    [Fact]
+    public async Task Updates_Populate_Meta_Info()
+    {
+        IKeyValueRepo repo = GetNewRepo();
+        var p = new Person("Test1", "Last", 1);
+
+        var TEST_Name = "test name";
+        IIdentity ident = new GenericIdentity(TEST_Name);
+        IPrincipal princ = new GenericPrincipal(ident, null);
+        Thread.CurrentPrincipal = princ;
+
+        await repo.Update<Person>(p.Id, p);
+
+        var result = await repo.GetMeta<Person>(p.Id);
+        result?.CreatedBy.Should().Be(TEST_Name);
+        result?.UpdatedBy.Should().Be(TEST_Name);
+
+        result?.Value?.Last.Should().Be(p.Last);
+        result?.Value?.First.Should().Be(p.First);
+        result?.Value?.Id.Should().Be(p.Id);
     }
 
     [Fact]

@@ -51,7 +51,7 @@ The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET S
 ---
 - In Progress: 0.3.0 - New Feature: KV Meta Objects
 - In Progress: Seperate and publish base unit tests
-- Consider: Adding Remove (id) and RemoveAll methods
+- Considering: 0.4.0 - New Feature: Remove / RemoveAll methods
 - New Repo: Azure Tables Implementation
 - New Repo: Sql Server Implementation
 - New Repo: Azure CosmoDB Implementation
