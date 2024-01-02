@@ -2,7 +2,7 @@
 namespace KeyValueRepoTests;
 
 [Collection("RepoTests")]
-public class InMemeoryTests{
+public class InMemoryTests{
 
     public virtual IKeyValueRepo GetNewRepo()
     {
@@ -47,6 +47,9 @@ public class InMemeoryTests{
         var p2 = await repo.Get<Person>(1);
         p2.Should().NotBeNull();
 
+        var nope = await repo.Get<UnusedType>(1);
+        nope.Should().BeNull();
+
         var randomId = Guid.NewGuid().ToString().Substring(0, 8);
         var p3 = await repo.Get<Person>(randomId);
         p3.Should().BeNull();
@@ -87,3 +90,4 @@ public class InMemeoryTests{
 
 public record Person (string First, string Last, int Id);
 public record Location (string Id, string Street, string City);
+public record UnusedType();
