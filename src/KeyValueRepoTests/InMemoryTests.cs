@@ -10,18 +10,27 @@ public class InMemoryTests{
         return new KeyValueInMemory();
     }
 
-    [Fact]
-    public async Task Updates_Populate_Meta_Info()
+    private async Task<IKeyValueRepo> getRepoWithPerson(Person p, string TestName)
     {
         IKeyValueRepo repo = GetNewRepo();
-        var p = new Person("Test1", "Last", 1);
-
-        var TEST_Name = "test name";
+        
+        var TEST_Name = TestName;
         IIdentity ident = new GenericIdentity(TEST_Name);
         IPrincipal princ = new GenericPrincipal(ident, null);
         Thread.CurrentPrincipal = princ;
 
         await repo.Update<Person>(p.Id, p);
+
+        return repo;
+    }
+
+    [Fact]
+    public async Task Updates_Populate_Meta_Info()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
 
         var result = await repo.GetMeta<Person>(p.Id);
         result?.CreatedBy.Should().Be(TEST_Name);
@@ -30,6 +39,20 @@ public class InMemoryTests{
         result?.Value?.Last.Should().Be(p.Last);
         result?.Value?.First.Should().Be(p.First);
         result?.Value?.Id.Should().Be(p.Id);
+    }
+
+    [Fact]
+    public async Task GetHistoryShouldReturnMetaList()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
+
+        var results = await repo.GetHistory<Person>(p.Id);
+        results?.Count.Should().Be(1);
+        results?.First()?.Value?.First.Should().Be(p.First);
+        results?.First()?.CreatedBy.Should().Be(TEST_Name);
     }
 
     [Fact]

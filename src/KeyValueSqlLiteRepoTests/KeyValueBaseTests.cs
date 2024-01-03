@@ -1,7 +1,4 @@
 
-using Calebs.Data.KeyValueRepo;
-using FluentAssertions;
-
 namespace KeyValueSqlLiteRepoTests;
 
 [Collection("RepoTests")]
@@ -28,7 +25,7 @@ public class KeyValueBaseTests{
         await repo.Update(p3.Id.ToString(), p3);
 
         var p4 = await repo.Get<Person>(1);
-        p4?.First.Should().Be("Test2");  
+        p4?.First.Should().Be("Test2");
     }
 
     [Fact]
