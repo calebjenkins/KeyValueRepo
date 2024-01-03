@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -26,7 +25,6 @@
 		<Product>Calebs.KeyValueRepo.SQLite</Product>
 		<Title>KeyValueRepo - SQLite implementation</Title>
 	</PropertyGroup>
-
 
 	<ItemGroup>
 		<PackageReference Include="Calebs.Extensions" Version="1.5.0" />
