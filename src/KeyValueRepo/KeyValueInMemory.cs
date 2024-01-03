@@ -44,7 +44,31 @@ public class KeyValueInMemory : IKeyValueRepo
         return await Task.FromResult<IList<T>>(list);
     }
 
-    public async Task<IList<MetaObject<T>>?> GetHistory<T>(string key) where T : class
+    public async Task<IList<MetaObject<T>>> GetMetaAll<T>() where T : class
+    {
+        string typeKey = typeof(T).ToString();
+        List<MetaObject<T>> list = new List<MetaObject<T>>();
+
+        if (_data.ContainsKey(typeKey))
+        {
+            var keys = _data[typeKey].Keys;
+            foreach (var key in keys)
+            {
+                if (_data[typeKey].ContainsKey(key))
+                {
+                    var data = _data[typeKey][key].FromJson<MetaObject<T>>();
+                    if (data != null)
+                    {
+                        list.Add(data);
+                    }
+                }
+            }
+        }
+
+        return await Task.FromResult<IList<MetaObject<T>>>(list);
+    }
+
+    public async Task<IList<MetaObject<T>>> GetHistory<T>(string key) where T : class
     {
         string typeKey = typeof(T).ToString();
 

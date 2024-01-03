@@ -23,7 +23,6 @@
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageId>Calebs.KeyValueRepo</PackageId>
 		<PackageIcon>KeyValueRepoLogo.png</PackageIcon>
-		<PackageIconUrl />
 		<Product>Calebs.KeyValueRepo</Product>
 		<Title>KeyValueRepo</Title>
 	</PropertyGroup>

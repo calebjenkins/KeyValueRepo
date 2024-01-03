@@ -14,7 +14,7 @@
 		<Copyright>Copyright Caleb Jenkins</Copyright>
 		<PackageProjectUrl>https://github.com/calebjenkins/</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/calebjenkins/KeyValueRepo</RepositoryUrl>
-		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>KeyValue;Data;Testing</PackageTags>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -26,35 +26,47 @@
 		<Product>Calebs.KeyValueRepoTests</Product>
 		<Title>KeyValueRepoTests</Title>
 	</PropertyGroup>
-		
-  <ItemGroup>
-    <Compile Remove="_Data\**" />
-    <EmbeddedResource Remove="_Data\**" />
-    <None Remove="_Data\**" />
-  </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
-    <PackageReference Include="Moq" Version="4.20.70" />
-    <PackageReference Include="WestDiscGolf.MoqExtensions" Version="1.0.2" />
-    <PackageReference Include="xunit" Version="2.6.4" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="6.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="_Data\**" />
+		<EmbeddedResource Remove="_Data\**" />
+		<None Remove="_Data\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\KeyValueRepo\KeyValueRepo.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="coverlet.msbuild" Version="6.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="FluentAssertions" Version="6.12.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
+		<PackageReference Include="Moq" Version="4.20.70" />
+		<PackageReference Include="WestDiscGolf.MoqExtensions" Version="1.0.2" />
+		<PackageReference Include="xunit" Version="2.6.4" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="coverlet.collector" Version="6.0.0">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\KeyValueRepo\KeyValueRepo.csproj" />
+		<None Include="..\..\assets\logo\KeyValueRepoLogo.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\..\README.md">
+			<PackagePath></PackagePath>
+			<Pack>True</Pack>
+		</None>
+	</ItemGroup>
 
 </Project>

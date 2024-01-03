@@ -42,6 +42,20 @@ public class InMemoryTests{
     }
 
     [Fact]
+    public async Task GetMetaAll_ReturnsAllForType()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
+        var p2 = new Person("Test2", "Last2", 2);
+        await repo.Update<Person>(p2.Id, p2);
+
+        var results = await repo.GetMetaAll<Person>();
+        results.Count.Should().BeGreaterThan(1);
+    }
+
+    [Fact]
     public async Task GetHistoryShouldReturnMetaList()
     {
         var p = new Person("Test1", "Last", 1);
@@ -50,6 +64,20 @@ public class InMemoryTests{
         IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
 
         var results = await repo.GetHistory<Person>(p.Id);
+        results?.Count.Should().Be(1);
+        results?.First()?.Value?.First.Should().Be(p.First);
+        results?.First()?.CreatedBy.Should().Be(TEST_Name);
+    }
+
+    [Fact]
+    public async Task GetMetaAll()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
+
+        var results = await repo. GetHistory<Person>(p.Id);
         results?.Count.Should().Be(1);
         results?.First()?.Value?.First.Should().Be(p.First);
         results?.First()?.CreatedBy.Should().Be(TEST_Name);

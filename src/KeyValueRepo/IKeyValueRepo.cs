@@ -5,5 +5,6 @@ public interface IKeyValueRepo
     Task<T?> Get<T>(string key) where T : class;
     Task<IList<T>> GetAll<T>() where T : class;
     Task<MetaObject<T>?> GetMeta<T>(string key) where T : class;
-    Task<IList<MetaObject<T>>?> GetHistory<T>(string key) where T : class;
+    Task<IList<MetaObject<T>>> GetHistory<T>(string key) where T : class;
+    Task<IList<MetaObject<T>>> GetMetaAll<T>() where T : class;
 }
