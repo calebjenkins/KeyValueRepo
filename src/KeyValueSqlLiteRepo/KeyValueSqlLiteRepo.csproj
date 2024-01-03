@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<AssemblyName>Calebs.KeyValueRepo.SqlLite</AssemblyName>
 		<RootNamespace>Calebs.Data.KeyValueRepo.SqlLite</RootNamespace>
-		<Version>0.1.0</Version>
+		<Version>0.4.0</Version>
 		<Configurations>Debug;Release;</Configurations>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Caleb Jenkins</Authors>
