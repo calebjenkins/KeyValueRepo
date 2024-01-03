@@ -7,7 +7,7 @@
 		<Nullable>enable</Nullable>
 		<RootNamespace>Calebs.Data.KeyValueRepo</RootNamespace>
 		<AssemblyName>Calebs.KeyValueRepo</AssemblyName>
-		<Version>0.2.0</Version>
+		<Version>0.3.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Caleb Jenkins</Authors>
 		<Company>Caleb Jenkins</Company>
@@ -23,13 +23,12 @@
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageId>Calebs.KeyValueRepo</PackageId>
 		<PackageIcon>KeyValueRepoLogo.png</PackageIcon>
-		<PackageIconUrl />
 		<Product>Calebs.KeyValueRepo</Product>
 		<Title>KeyValueRepo</Title>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Calebs.Extensions" Version="1.5.0-ci-62" />
+		<PackageReference Include="Calebs.Extensions" Version="1.5.0" />
 		<None Include="..\..\assets\logo\KeyValueRepoLogo.png">
       		<Pack>True</Pack>
       		<PackagePath></PackagePath>

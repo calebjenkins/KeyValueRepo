@@ -1,8 +1,8 @@
 
-namespace KeyValueRepoTests;
+namespace KeyValueSqlLiteRepoTests;
 
 [Collection("RepoTests")]
-public class InMemeoryTests{
+public class KeyValueBaseTests{
 
     public virtual IKeyValueRepo GetNewRepo()
     {
@@ -25,14 +25,14 @@ public class InMemeoryTests{
         await repo.Update(p3.Id.ToString(), p3);
 
         var p4 = await repo.Get<Person>(1);
-        p4?.First.Should().Be("Test2");  
+        p4?.First.Should().Be("Test2");
     }
 
     [Fact]
     public async Task ShouldReturnVoidForUnknownTypes()
     {
         IKeyValueRepo repo = GetNewRepo();
-        var p = await repo.Get<Person>("1");
+        var p = await repo.Get<UnusedType>("1");
 
         p.Should().BeNull();
     }
@@ -87,3 +87,4 @@ public class InMemeoryTests{
 
 public record Person (string First, string Last, int Id);
 public record Location (string Id, string Street, string City);
+public record UnusedType();

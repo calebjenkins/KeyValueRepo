@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0;</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AssemblyName>Calebs.KeyValueRepo.SqlLite</AssemblyName>
-    <RootNamespace>Calebs.Data.KeyValueRepo.SqlLite</RootNamespace>
-	  <Version>0.1.0</Version>
-	  <Configurations>Debug;Release;</Configurations>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0;</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AssemblyName>Calebs.KeyValueRepo.SqlLite</AssemblyName>
+		<RootNamespace>Calebs.Data.KeyValueRepo.SqlLite</RootNamespace>
+		<Version>0.1.0</Version>
+		<Configurations>Debug;Release;</Configurations>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Caleb Jenkins</Authors>
 		<Company>Caleb Jenkins</Company>
@@ -22,28 +22,28 @@
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageId>Calebs.KeyValueRepo.SQLite</PackageId>
-		<PackageIconUrl />
+		<PackageIcon>KeyValueRepoLogo.png</PackageIcon>
 		<Product>Calebs.KeyValueRepo.SQLite</Product>
 		<Title>KeyValueRepo - SQLite implementation</Title>
 	</PropertyGroup>
-	
-	
-  <ItemGroup>
-    <PackageReference Include="Calebs.Extensions" Version="1.5.0-ci-62" />
-    <PackageReference Include="Calebs.KeyValueRepo" Version="0.2.0-ci-9" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+
+
+	<ItemGroup>
+		<PackageReference Include="Calebs.Extensions" Version="1.5.0" />
+		<PackageReference Include="Calebs.KeyValueRepo" Version="0.2.0-ci-9" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
 		<None Include="..\..\LICENSE">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
 		<None Include=".\README.md">
-		  <PackagePath></PackagePath>
-		  <Pack>True</Pack>
+			<PackagePath></PackagePath>
+			<Pack>True</Pack>
 		</None>
 		<None Include="..\..\assets\logo\KeyValueRepoLogo.png">
-      		<Pack>True</Pack>
-      		<PackagePath></PackagePath>
-    	</None>
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
 	</ItemGroup>
 </Project>

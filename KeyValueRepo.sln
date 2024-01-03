@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepoTests", "src\Ke
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KeyValueRepo.Benchmarks", "src\KeyValueRepo.Benchmarks\KeyValueRepo.Benchmarks.csproj", "{AC234450-6779-4916-92E6-DF39459273A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyValueSqlLiteRepoTests", "src\KeyValueSqlLiteRepoTests\KeyValueSqlLiteRepoTests.csproj", "{109EDB5F-5B9A-4FE8-AFFE-96713BC4E15F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{AC234450-6779-4916-92E6-DF39459273A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC234450-6779-4916-92E6-DF39459273A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC234450-6779-4916-92E6-DF39459273A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{109EDB5F-5B9A-4FE8-AFFE-96713BC4E15F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{109EDB5F-5B9A-4FE8-AFFE-96713BC4E15F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{109EDB5F-5B9A-4FE8-AFFE-96713BC4E15F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{109EDB5F-5B9A-4FE8-AFFE-96713BC4E15F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
