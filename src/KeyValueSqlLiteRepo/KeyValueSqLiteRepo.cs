@@ -424,6 +424,18 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
     }
 
+    public Task<MetaObject<T>?> GetMeta<T>(string key) where T : class
+    {
+        throw new NotImplementedException();
+    }
 
+    public Task<IList<MetaObject<T>>> GetHistory<T>(string key) where T : class
+    {
+        throw new NotImplementedException();
+    }
 
+    public Task<IList<MetaObject<T>>> GetMetaAll<T>() where T : class
+    {
+        throw new NotImplementedException();
+    }
 }
