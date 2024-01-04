@@ -3,12 +3,13 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<Configurations>Debug;Release;</Configurations>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<IsPackable>true</IsPackable>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<Nullable>enable</Nullable>
 		<RootNamespace>Calebs.Data.KeyValueRepoTests</RootNamespace>
 		<AssemblyName>Calebs.KeyValueRepoTests</AssemblyName>
 		<Version>0.4.0</Version>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Authors>Caleb Jenkins</Authors>
 		<Company>Caleb Jenkins</Company>
 		<Description>a set of tests that all IKeyValueRepo implementations should pass.</Description>
