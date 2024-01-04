@@ -85,21 +85,21 @@ jobs:
             run: dotnet pack --configuration Release -p:Version=${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER} --include-symbols --output .
             if: ${{ steps.detect_develop.outcome == 'success' }}
 
-          # - name: Push Libraries to Nuget
-          #   # if: ${{ steps.detect_develop.outcome == 'success' }}
+          - name: Push Libraries to Nuget
+            # if: ${{ steps.detect_develop.outcome == 'success' }}
+            if: ${{ github.ref == 'refs/heads/develop' }}
+            # run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.FAKEAUTH_NUGET_KEY}}
+            # run: dotnet nuget push Calebs.KeyValueRepo.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
+            run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
+
+          # - name: Push KVR Symbols to Nuget
           #   if: ${{ github.ref == 'refs/heads/develop' }}
-          #   # run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.FAKEAUTH_NUGET_KEY}}
-          #   # run: dotnet nuget push Calebs.KeyValueRepo.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
-          #   run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
+          #   run: dotnet nuget push Calebs.KeyValueRepo.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
 
-          - name: Push KVR Symbols to Nuget
-            if: ${{ github.ref == 'refs/heads/develop' }}
-            run: dotnet nuget push Calebs.KeyValueRepo.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
+          # - name: Push KVR.SqLite Symbols to Nuget
+          #   if: ${{ github.ref == 'refs/heads/develop' }}
+          #   run: dotnet nuget push Calebs.KeyValueSqlLiteRepo.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
 
-          - name: Push KVR.SqLite Symbols to Nuget
-            if: ${{ github.ref == 'refs/heads/develop' }}
-            run: dotnet nuget push Calebs.KeyValueSqlLiteRepo.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
-
-          - name: Push KVR.Tests Symbols to Nuget
-            if: ${{ github.ref == 'refs/heads/develop' }}
-            run: dotnet nuget push Calebs.KeyValueRepoTests.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
+          # - name: Push KVR.Tests Symbols to Nuget
+          #   if: ${{ github.ref == 'refs/heads/develop' }}
+          #   run: dotnet nuget push Calebs.KeyValueRepoTests.${{steps.get_version.outputs.RELEASE_VERSION}}-ci-${GITHUB_RUN_NUMBER}.snupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_KEY}}
