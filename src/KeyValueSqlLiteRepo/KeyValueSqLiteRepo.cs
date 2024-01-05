@@ -31,7 +31,6 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
     }
 
     public SqliteConnection DbConn { get { return _db; } }
-
     public string DatabaseFileName => Path.GetFullPath(_db.DataSource);
 
 
@@ -52,7 +51,6 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         
         return (!result.HasError);
     }
-
     public async Task ReleaseForCleanUp()
     {
         SqliteConnection.ClearPool(_db);
@@ -66,23 +64,70 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         return;
     }
 
+    public async Task<MetaObject<T>?> GetMeta<T>(string key) where T : class
+    {
+        return await selectMetaRecord<T>(key);
+    }
     public async Task<T?> Get<T>(string key) where T : class
     {
-        var valueType = typeof(T).ToString();
-        var value = await selectRecord(key, valueType);
-        if(value.IsNullOrEmpty())
-        {
-            return null;
-        }
-
-        var returnValue = value.FromJson<T>();
-        return returnValue;
+        var result = await GetMeta<T>(key);
+        return result?.Value;
     }
 
     public async Task<IList<T>> GetAll<T>() where T : class
     {
         var list = await selectAllRecords<T>();
         return list;
+    }
+
+    public async Task<IList<MetaObject<T>>> GetHistory<T>(string key) where T : class
+    {
+        var valueType = typeof(T).ToString();
+
+        try
+        {
+            _db.ConfirmOpen();
+
+            var results = new List<MetaObject<T>>();
+            var command = getCommandForSelectOneIncludeHistory(key, valueType, ref _db, _options);
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (reader.Read())
+            {
+                var keyRecord = reader.GetString(0);  // unused - useful for debugging
+                var typeRecord = reader.GetString(1); // unused - useful for debugging
+                var valueRecord = reader.GetString(2);
+                var createdBy = reader.GetString(3);
+                var createdOn = reader.GetString(4);
+                var updatedBy = reader.GetString(5);
+                var updatedOn = reader.GetString(6);
+
+                var cDt = DateTime.Parse(createdOn);
+                var uDt = DateTime.Parse(updatedOn);
+
+                var mo = new MetaObject<T>()
+                {
+                    Value = valueRecord.FromJson<T>(),
+                    CreatedBy = createdBy,
+                    CreatedOn = cDt,
+                    UpdatedBy = updatedBy,
+                    UpdatedOn = uDt
+                };
+                results.Add(mo);
+            }
+
+            return results;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error in Select Record: {0}", ex.Message);
+            throw;
+        }
+    }
+
+    public async Task<IList<MetaObject<T>>> GetMetaAll<T>() where T : class
+    {
+        return await selectAllMetaRecords<T>();
     }
 
     public async Task Update<T>(string key, T value) where T : class
@@ -145,6 +190,50 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
             return false;
         }
     }
+
+    private async Task<MetaObject<T>?> selectMetaRecord<T>(string key) where T : class
+    {
+        var valueType = typeof(T).ToString();
+        MetaObject<T>? result = null; 
+
+        try
+        {
+            _db.ConfirmOpen();
+
+            var command = getCommandForSelectOne(key, valueType, ref _db, _options);
+            using var reader = await command.ExecuteReaderAsync();
+            while (reader.Read())
+            {
+                var keyRecord = reader.GetString(0);  // unused - useful for debugging
+                var typeRecord = reader.GetString(1); // unused - useful for debugging
+                var valueRecord = reader.GetString(2);
+                var createdBy = reader.GetString(3);
+                var createdOn = reader.GetDateTime(4);
+                var updatedBy = reader.GetString(5);
+                var updatedOn = reader.GetDateTime(6);
+
+                // DateTime cDt = DateTime.Parse(createdOn);
+                // DateTime uDt = DateTime.Parse(updatedOn);
+
+
+                result = new MetaObject<T>()
+                {
+                    Value = valueRecord.FromJson<T>(),
+                    CreatedBy = createdBy,
+                    CreatedOn = createdOn,
+                    UpdatedBy = updatedBy,
+                    UpdatedOn = updatedOn
+                };
+            }
+            return result;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error in Select Record: {0}", ex.Message);
+            throw;
+        }
+    }
+
     private async Task<string> selectRecord(string key, string valueType)
     {
         var Value = string.Empty;
@@ -156,6 +245,15 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
+                /*
+                 SELECT {Opt.ColumnPrefix + Opt.KeyColumnName},
+                            {Opt.ColumnPrefix + Opt.TypeValueColumnName},
+                            {Opt.ColumnPrefix + Opt.ValueColumnName},
+                            {Opt.ColumnPrefix + Opt.CreateByColumnName},
+                            {Opt.ColumnPrefix + Opt.CreateOnColumnName},
+                            {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
+                            {Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
+                 */
                 var v1 = reader.GetString(0);
                 var v2 = reader.GetString(1);
                 Value = reader.GetString(2);
@@ -196,8 +294,41 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
             throw;
         }
     }
+    private async Task<IList<MetaObject<T>>> selectAllMetaRecords<T>() where T : class
+    {
+        var valueType = typeof(T).ToString();
+        var Values = new List<MetaObject<T>>();
 
-    private SqliteCommand getCommandForSelectOne(string key, string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt, bool hasHistory = true)
+        try
+        {
+            _db.ConfirmOpen();
+
+            var command = getCommandForSelectAll(valueType, ref _db, _options);
+            using var reader = await command.ExecuteReaderAsync();
+            while (reader.Read())
+            {
+                MetaObject<T> mo = new MetaObject<T>()
+                {
+                    Value = reader.GetString(2).FromJson<T>(),
+                    CreatedBy = reader.GetString(3),
+                    CreatedOn = reader.GetDateTime(4),
+                    UpdatedBy = reader.GetString(5),
+                    UpdatedOn = reader.GetDateTime(6)
+                };
+
+                Values.Add(mo);
+            }
+
+            return Values;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            throw;
+        }
+    }
+
+    private SqliteCommand getCommandForSelectOne(string key, string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
         cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
@@ -212,7 +343,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
         cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
 
-        var historySql = (!hasHistory) ? string.Empty : $@"AND {Opt.ColumnPrefix + Opt.UpdatedOnColumnName} = (SELECT MAX({Opt.ColumnPrefix + Opt.UpdatedOnColumnName})
+        var historySql = (!Opt.TrackHistory) ? string.Empty : $@"AND {Opt.ColumnPrefix + Opt.UpdatedOnColumnName} = (SELECT MAX({Opt.ColumnPrefix + Opt.UpdatedOnColumnName})
                                             FROM { Opt.DefaultTableName }
                                             WHERE {Opt.ColumnPrefix + Opt.KeyColumnName} = $Key_Value
                                              AND {Opt.ColumnPrefix + Opt.TypeValueColumnName} = $ValueType_Value)";
@@ -221,10 +352,10 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                             {Opt.ColumnPrefix + Opt.TypeValueColumnName},
                             {Opt.ColumnPrefix + Opt.ValueColumnName},
                             {Opt.ColumnPrefix + Opt.CreateByColumnName},
-                            {Opt.ColumnPrefix + Opt.CreateOnColumnName},
+                            datetime({Opt.ColumnPrefix + Opt.CreateOnColumnName}, 'unixepoch'),
                             {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
-                            {Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
-
+                            datetime({Opt.ColumnPrefix + Opt.UpdatedOnColumnName}, 'unixepoch')
+                            
                     FROM { Opt.DefaultTableName }
 
                     WHERE {Opt.ColumnPrefix + Opt.KeyColumnName} = $Key_Value
@@ -236,7 +367,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
     }
 
-    private SqliteCommand getCommandForSelectOneIncludeHistory(string key, string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand getCommandForSelectOneIncludeHistory(string key, string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
         cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
@@ -257,9 +388,9 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                             $ValueType_Column,
                             $Value_Column,
                             $CreatedBy_Column,
-                            $CreatedOn_Column,
+                            datetime($CreatedOn_Column, 'unixepoch'),
                             $UpdatedBy_Column,
-                            $UpdatedOn_Column
+                            datetime($UpdatedOn_Column, 'unixepoch')
 
                     FROM $table_name
 
@@ -285,16 +416,17 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
         cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
 
-       // cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
+        // cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
 
+        //datetime($CreatedOn_Column, 'unixepoch'),
         var sql = $@"
             SELECT t.{Opt.ColumnPrefix + Opt.KeyColumnName},
                    t.{Opt.ColumnPrefix + Opt.TypeValueColumnName},
                    t.{Opt.ColumnPrefix + Opt.ValueColumnName}, 
                    t.{Opt.ColumnPrefix + Opt.CreateByColumnName},
-                   t.{Opt.ColumnPrefix + Opt.CreateOnColumnName},
+                   datetime(t.{Opt.ColumnPrefix + Opt.CreateOnColumnName}, 'unixepoch'),
                    t.{Opt.ColumnPrefix + Opt.UpdatedByColumnName},
-                   t.{Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
+                   datetime(t.{Opt.ColumnPrefix + Opt.UpdatedOnColumnName}, 'unixepoch')
             FROM {Opt.DefaultTableName} as t
             JOIN (
                 SELECT {Opt.ColumnPrefix + Opt.KeyColumnName},
@@ -422,20 +554,5 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
         return cmd;
 
-    }
-
-    public Task<MetaObject<T>?> GetMeta<T>(string key) where T : class
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IList<MetaObject<T>>> GetHistory<T>(string key) where T : class
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IList<MetaObject<T>>> GetMetaAll<T>() where T : class
-    {
-        throw new NotImplementedException();
     }
 }

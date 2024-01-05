@@ -1,12 +1,87 @@
 
+using System.Security.Principal;
+
 namespace KeyValueSqlLiteRepoTests;
 
-[Collection("RepoTests")]
-public class KeyValueBaseTests{
+
+public abstract class KeyValueBaseTests{
 
     public virtual IKeyValueRepo GetNewRepo()
     {
         return new KeyValueInMemory();
+    }
+
+    private async Task<IKeyValueRepo> getRepoWithPerson(Person p, string TestName)
+    {
+        IKeyValueRepo repo = GetNewRepo();
+
+        var TEST_Name = TestName;
+        IIdentity ident = new GenericIdentity(TEST_Name);
+        IPrincipal princ = new GenericPrincipal(ident, null);
+        Thread.CurrentPrincipal = princ;
+
+        await repo.Update<Person>(p.Id, p);
+
+        return repo;
+    }
+
+    [Fact]
+    public async Task Updates_Populate_Meta_Info()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
+
+        var result = await repo.GetMeta<Person>(p.Id);
+        result?.CreatedBy.Should().Be(TEST_Name);
+        result?.UpdatedBy.Should().Be(TEST_Name);
+
+        result?.Value?.Last.Should().Be(p.Last);
+        result?.Value?.First.Should().Be(p.First);
+        result?.Value?.Id.Should().Be(p.Id);
+    }
+
+    [Fact]
+    public async Task GetMetaAll_ReturnsAllForType()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
+        var p2 = new Person("Test2", "Last2", 2);
+        await repo.Update<Person>(p2.Id, p2);
+
+        var results = await repo.GetMetaAll<Person>();
+        results.Count.Should().BeGreaterThan(1);
+    }
+
+    [Fact]
+    public async Task GetHistoryShouldReturnMetaList()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
+
+        var results = await repo.GetHistory<Person>(p.Id);
+        results?.Count.Should().Be(1);
+        results?.First()?.Value?.First.Should().Be(p.First);
+        results?.First()?.CreatedBy.Should().Be(TEST_Name);
+    }
+
+    [Fact]
+    public async Task GetHistory()
+    {
+        var p = new Person("Test1", "Last", 1);
+        var TEST_Name = "test name";
+
+        IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
+
+        var results = await repo.GetHistory<Person>(p.Id);
+        results?.Count.Should().Be(1);
+        results?.First()?.Value?.First.Should().Be(p.First);
+        results?.First()?.CreatedBy.Should().Be(TEST_Name);
     }
 
     [Fact]
@@ -32,7 +107,7 @@ public class KeyValueBaseTests{
     public async Task ShouldReturnVoidForUnknownTypes()
     {
         IKeyValueRepo repo = GetNewRepo();
-        var p = await repo.Get<UnusedType>("1");
+        var p = await repo.Get<Person>("1");
 
         p.Should().BeNull();
     }
@@ -46,6 +121,9 @@ public class KeyValueBaseTests{
 
         var p2 = await repo.Get<Person>(1);
         p2.Should().NotBeNull();
+
+        var nope = await repo.Get<UnusedType>(1);
+        nope.Should().BeNull();
 
         var randomId = Guid.NewGuid().ToString().Substring(0, 8);
         var p3 = await repo.Get<Person>(randomId);
