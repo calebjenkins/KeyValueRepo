@@ -82,10 +82,6 @@ public abstract class KeyValueBaseTests{
         results?.Count.Should().Be(1);
         results?.First()?.Value?.First.Should().Be(p.First);
         results?.First()?.CreatedBy.Should().Be(TEST_Name);
-
-        // clean up
-        await repo.AsKeyValueSqlLiteRepo().RemoveAll<Person>();
-
     }
 
     [Fact]
@@ -111,7 +107,7 @@ public abstract class KeyValueBaseTests{
     public async Task ShouldReturnVoidForUnknownTypes()
     {
         IKeyValueRepo repo = GetNewRepo();
-        var p = await repo.Get<Person>("1");
+        var p = await repo.Get<UnusedType>("1");
 
         p.Should().BeNull();
     }
