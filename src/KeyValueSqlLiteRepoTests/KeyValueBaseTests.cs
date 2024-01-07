@@ -50,7 +50,7 @@ public abstract class KeyValueBaseTests{
 
         IKeyValueRepo repo = await getRepoWithPerson(p, TEST_Name);
         var p2 = new Person("Test2", "Last2", 2);
-        await repo.Update<Person>(p2.Id, p2);
+        await repo.Update(p2.Id, p2);
 
         var results = await repo.GetMetaAll<Person>();
         results.Count.Should().BeGreaterThan(1);
@@ -82,6 +82,10 @@ public abstract class KeyValueBaseTests{
         results?.Count.Should().Be(1);
         results?.First()?.Value?.First.Should().Be(p.First);
         results?.First()?.CreatedBy.Should().Be(TEST_Name);
+
+        // clean up
+        await repo.AsKeyValueSqlLiteRepo().RemoveAll<Person>();
+
     }
 
     [Fact]

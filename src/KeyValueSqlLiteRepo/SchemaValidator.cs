@@ -187,12 +187,13 @@ public class SchemaValidator
     {
         // Track History: No Primary Key, so we can rely on Insert
         // Not Tracking History, we use PKs since we're relying on constraints for Upserts
-        var primaryKey = (opt.TrackHistory) ? $@");" : $@", Primary Key ({opt.ColumnPrefix + opt.KeyColumnName}, {opt.ColumnPrefix + opt.TypeValueColumnName})
+        var primaryKey = (opt.TrackHistory) ? $@");" : $@", Primary Key ({opt.ColumnPrefix + opt.KeyColumnName}, {opt.ColumnPrefix + opt.TypeColumnName})
                ) WITHOUT ROWID;";         
 
         var createTableSql = $@"
-            CREATE TABLE {TableName} ({opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
-                    {opt.ColumnPrefix + opt.TypeValueColumnName} TEXT NOT NULL,
+            CREATE TABLE {TableName} (
+                    {opt.ColumnPrefix + opt.KeyColumnName} TEXT NOT NULL,
+                    {opt.ColumnPrefix + opt.TypeColumnName} TEXT NOT NULL,
                     {opt.ColumnPrefix + opt.ValueColumnName} TEXT NOT NULL,
                     {opt.ColumnPrefix + opt.CreateByColumnName} TEXT,
                     {opt.ColumnPrefix + opt.CreateOnColumnName} INTEGER NOT NULL,

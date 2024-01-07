@@ -9,8 +9,8 @@ public class KeyValueSqlLiteOptions
     public string DefaultTableName { get; set; } = "KeyValueRepo";
     public string ColumnPrefix { get; set; } = string.Empty;
     public string KeyColumnName { get; set; } = "Key";
+    public string TypeColumnName { get; set; } = "Type";
     public string ValueColumnName { get; set; } = "Value";
-    public string TypeValueColumnName { get; set; } = "Type";
 
     public string CreateByColumnName { get; set; } = "CreatedBy";
     public string CreateOnColumnName { get; set; } = "CreatedOn";

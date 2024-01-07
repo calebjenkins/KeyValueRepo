@@ -1,4 +1,7 @@
 ﻿
+using Newtonsoft.Json.Linq;
+using System;
+
 namespace Calebs.Data.KeyValueRepo.SqlLite;
 
 public class KeyValueSqLiteRepo : IKeyValueRepo
@@ -73,13 +76,11 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         var result = await GetMeta<T>(key);
         return result?.Value;
     }
-
     public async Task<IList<T>> GetAll<T>() where T : class
     {
         var list = await selectAllRecords<T>();
         return list;
     }
-
     public async Task<IList<MetaObject<T>>> GetHistory<T>(string key) where T : class
     {
         var valueType = typeof(T).ToString();
@@ -89,7 +90,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
             _db.ConfirmOpen();
 
             var results = new List<MetaObject<T>>();
-            var command = getCommandForSelectOneIncludeHistory(key, valueType, ref _db, _options);
+            var command = commandForSelectOneIncludeHistory(key, valueType, ref _db, _options);
 
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
@@ -124,10 +125,26 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
             throw;
         }
     }
-
     public async Task<IList<MetaObject<T>>> GetMetaAll<T>() where T : class
     {
         return await selectAllMetaRecords<T>();
+    }
+    public async Task<bool> RemoveAll<T>() where T : class
+    {
+        var valueType = typeof(T).ToString();
+        try
+        {
+            _db.ConfirmOpen();
+            var command = commandForClearAll(valueType, _db, _options);
+            var result = await command.ExecuteNonQueryAsync();
+            return true;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error validating Default Table: {0}", ex.Message);
+            return false;
+        }
+
     }
 
     public async Task Update<T>(string key, T value) where T : class
@@ -139,12 +156,12 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
         if(_options.TrackHistory)
         {
-            // Insert
+            // Insert - if we're tracking history, we always to Inserts
             var result = await insertRecord(key, valueType, value.ToJson(), user);
         }
         else
         {
-            // upsert
+            // upsert - this will do an insert or update if there is a PK conflict
             var result = await updateRecord(key, valueType, value.ToJson(), user);
         }
         
@@ -164,7 +181,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             _db.ConfirmOpen();
 
-            var command = getCommandForInsert(key, valueType, value, user, _db, _options);
+            var command = commandForInsert(key, valueType, value, user, _db, _options);
             var result = await command.ExecuteNonQueryAsync();
             return (result > 0)? true : false;
         }
@@ -180,7 +197,8 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             _db.ConfirmOpen();
 
-            var command = getCommandForUpcert(key, valueType, value, user, _db, _options);
+            // var command = commandForUpcert(key, valueType, value, user, _db, _options);
+            var command = upcertCommand(key, valueType, value, user, _db, _options);
             var result = await command.ExecuteNonQueryAsync();
             return (result > 0) ? true : false;
         }
@@ -200,7 +218,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             _db.ConfirmOpen();
 
-            var command = getCommandForSelectOne(key, valueType, ref _db, _options);
+            var command = commandForSelectOne(key, valueType, ref _db, _options);
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
@@ -241,7 +259,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             _db.ConfirmOpen();
 
-            var command = getCommandForSelectOne(key, valueType, ref _db, _options);
+            var command = commandForSelectOne(key, valueType, ref _db, _options);
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
@@ -278,7 +296,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             _db.ConfirmOpen();
 
-            var command = getCommandForSelectAll(valueType, ref _db, _options);
+            var command = commandForSelectAll(valueType, ref _db, _options);
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
@@ -303,7 +321,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         {
             _db.ConfirmOpen();
 
-            var command = getCommandForSelectAll(valueType, ref _db, _options);
+            var command = commandForSelectAll(valueType, ref _db, _options);
             using var reader = await command.ExecuteReaderAsync();
             while (reader.Read())
             {
@@ -328,28 +346,19 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         }
     }
 
-    private SqliteCommand getCommandForSelectOne(string key, string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand commandForSelectOne(string key, string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
-        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
         cmd.Parameters.AddWithValue("$Key_Value", key);
-
-        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
         cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
-
-        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
-        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
-        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
-        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
-        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
 
         var historySql = (!Opt.TrackHistory) ? string.Empty : $@"AND {Opt.ColumnPrefix + Opt.UpdatedOnColumnName} = (SELECT MAX({Opt.ColumnPrefix + Opt.UpdatedOnColumnName})
                                             FROM { Opt.DefaultTableName }
                                             WHERE {Opt.ColumnPrefix + Opt.KeyColumnName} = $Key_Value
-                                             AND {Opt.ColumnPrefix + Opt.TypeValueColumnName} = $ValueType_Value)";
+                                             AND {Opt.ColumnPrefix + Opt.TypeColumnName} = $ValueType_Value)";
 
         var sql = $@"SELECT {Opt.ColumnPrefix + Opt.KeyColumnName},
-                            {Opt.ColumnPrefix + Opt.TypeValueColumnName},
+                            {Opt.ColumnPrefix + Opt.TypeColumnName},
                             {Opt.ColumnPrefix + Opt.ValueColumnName},
                             {Opt.ColumnPrefix + Opt.CreateByColumnName},
                             datetime({Opt.ColumnPrefix + Opt.CreateOnColumnName}, 'unixepoch'),
@@ -359,69 +368,46 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                     FROM { Opt.DefaultTableName }
 
                     WHERE {Opt.ColumnPrefix + Opt.KeyColumnName} = $Key_Value
-                      AND {Opt.ColumnPrefix + Opt.TypeValueColumnName} = $ValueType_Value
+                      AND {Opt.ColumnPrefix + Opt.TypeColumnName} = $ValueType_Value
                       {historySql} ;";
 
         cmd.CommandText = sql;
         return cmd;
 
     }
-
-    private SqliteCommand getCommandForSelectOneIncludeHistory(string key, string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand commandForSelectOneIncludeHistory(string key, string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
-        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
         cmd.Parameters.AddWithValue("$Key_Value", key);
+        cmd.Parameters.AddWithValue("$Type_Value", valueType);
 
-        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
-        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
+        var sql = $@"SELECT { Opt.ColumnPrefix + Opt.KeyColumnName },
+                            { Opt.ColumnPrefix + Opt.TypeColumnName },
+                            { Opt.ColumnPrefix + Opt.ValueColumnName },
+                            { Opt.ColumnPrefix + Opt.CreateByColumnName },
+                            datetime({Opt.ColumnPrefix + Opt.CreateOnColumnName}, 'unixepoch'),
+                            {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
+                            datetime({Opt.ColumnPrefix + Opt.UpdatedOnColumnName}, 'unixepoch')
 
-        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
-        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
-        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
-        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
-        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
+                    FROM { Opt.DefaultTableName }
 
-        cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
-
-        var sql = $@"SELECT $Key_Column,
-                            $ValueType_Column,
-                            $Value_Column,
-                            $CreatedBy_Column,
-                            datetime($CreatedOn_Column, 'unixepoch'),
-                            $UpdatedBy_Column,
-                            datetime($UpdatedOn_Column, 'unixepoch')
-
-                    FROM $table_name
-
-                    WHERE $Key_Column = $Key_Value
-                      AND $ValueType_Column = $ValueType_Value
-                 ORDER BY $UpdatedOn_Column ASC;";
+                    WHERE { Opt.ColumnPrefix + Opt.KeyColumnName } = $Key_Value
+                      AND { Opt.ColumnPrefix + Opt.TypeColumnName } = $Type_Value
+                 ORDER BY { Opt.ColumnPrefix + Opt.UpdatedOnColumnName } ASC;";
 
         cmd.CommandText = sql;
         return cmd;
 
     }
-
-    private SqliteCommand getCommandForSelectAll(string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand commandForSelectAll(string valueType, ref SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
-        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
-        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
         cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
-
-        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
-        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
-        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
-        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
-        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
-
-        // cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
 
         //datetime($CreatedOn_Column, 'unixepoch'),
         var sql = $@"
             SELECT t.{Opt.ColumnPrefix + Opt.KeyColumnName},
-                   t.{Opt.ColumnPrefix + Opt.TypeValueColumnName},
+                   t.{Opt.ColumnPrefix + Opt.TypeColumnName},
                    t.{Opt.ColumnPrefix + Opt.ValueColumnName}, 
                    t.{Opt.ColumnPrefix + Opt.CreateByColumnName},
                    datetime(t.{Opt.ColumnPrefix + Opt.CreateOnColumnName}, 'unixepoch'),
@@ -432,7 +418,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                 SELECT {Opt.ColumnPrefix + Opt.KeyColumnName},
                        MAX({Opt.ColumnPrefix + Opt.UpdatedOnColumnName}) AS MaxDate
                 FROM {Opt.DefaultTableName}
-                WHERE {Opt.ColumnPrefix + Opt.TypeValueColumnName} = $ValueType_Value
+                WHERE {Opt.ColumnPrefix + Opt.TypeColumnName} = $ValueType_Value
                 GROUP BY {Opt.ColumnPrefix + Opt.KeyColumnName}
             ) as sub
             ON t.{Opt.ColumnPrefix + Opt.KeyColumnName} = sub.{Opt.ColumnPrefix + Opt.KeyColumnName}
@@ -443,106 +429,74 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         return cmd;
 
     }
-
-    private SqliteCommand getCommandForInsert(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand commandForInsert(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var utcNow = DateTime.UtcNow;
         var cmd = Db.CreateCommand();
-        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
+
         cmd.Parameters.AddWithValue("$Key_Value", key);
-
-        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
         cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
-
-        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
         cmd.Parameters.AddWithValue("$Value_Value", value);
 
-        cmd.Parameters.AddWithValue("$CreatedBy_Column", Opt.ColumnPrefix + Opt.CreateByColumnName);
         cmd.Parameters.AddWithValue("$CreatedBy_Value", User);
-
-        cmd.Parameters.AddWithValue("$CreatedOn_Column", Opt.ColumnPrefix + Opt.CreateOnColumnName);
         cmd.Parameters.AddWithValue("$CreatedOn_Value", utcNow);
-
-        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
         cmd.Parameters.AddWithValue("$UpdatedBy_Value", User);
-
-        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
         cmd.Parameters.AddWithValue("$UpdatedOn_Value", utcNow);
 
-
-        cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
-
-
-        // INSERT INTO table_name (column1, column2, column3, ...)
-        // VALUES(value1, value2, value3, ...);
-        var sql = $@"INSERT INTO $table_name
-                            ( $Key_Column,
-                            $ValueType_Column,
-                            $Value_Column,
-                            $CreatedBy_Column,
-                            $CreatedOn_Column,
-                            $UpdatedBy_Column,
-                            $UpdatedOn_Column)
-                    VALUES ($Key_Value,
-                            $ValueType_Value,
-                            $Value_Value,
-                            $CreatedBy_Value,
-                            unixepoch($CreatedOn_Value),
-                            $UpdatedBy_Value,
-                            unixepoch($UpdatedOn_Value)
-                             );";
+        var sql = $@"INSERT INTO { Opt.DefaultTableName }
+                   (
+                    {Opt.ColumnPrefix + Opt.KeyColumnName},
+                    {Opt.ColumnPrefix + Opt.TypeColumnName},
+                    {Opt.ColumnPrefix + Opt.TypeColumnName},
+                    {Opt.ColumnPrefix + Opt.CreateByColumnName},
+                    {Opt.ColumnPrefix + Opt.CreateOnColumnName},
+                    {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
+                    {Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
+                   ) VALUES (
+                     $Key_Value,
+                     $ValueType_Value,
+                     $Value_Value,
+                     $CreatedBy_Value,
+                     unixepoch($CreatedOn_Value),
+                     $UpdatedBy_Value,
+                     unixepoch($UpdatedOn_Value)
+                   );";
 
         cmd.CommandText = sql;
 
         return cmd;
 
     }
-
-    private SqliteCommand getCommandForUpcert(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand commandForUpcert(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var utcNow = DateTime.UtcNow;
         var cmd = Db.CreateCommand();
-        cmd.Parameters.AddWithValue("$Key_Column", Opt.ColumnPrefix + Opt.KeyColumnName);
+        
         cmd.Parameters.AddWithValue("$Key_Value", key);
-
-        cmd.Parameters.AddWithValue("$ValueType_Column", Opt.ColumnPrefix + Opt.TypeValueColumnName);
-        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
-
-        cmd.Parameters.AddWithValue("$Value_Column", Opt.ColumnPrefix + Opt.ValueColumnName);
+        cmd.Parameters.AddWithValue("$Type_Value", valueType);
         cmd.Parameters.AddWithValue("$Value_Value", value);
 
-        cmd.Parameters.AddWithValue("$UpdatedBy_Column", Opt.ColumnPrefix + Opt.UpdatedByColumnName);
         cmd.Parameters.AddWithValue("$UpdatedBy_Value", User);
-
-        cmd.Parameters.AddWithValue("$UpdatedOn_Column", Opt.ColumnPrefix + Opt.UpdatedOnColumnName);
         cmd.Parameters.AddWithValue("$UpdatedOn_Value", utcNow);
 
-
-        // cmd.Parameters.AddWithValue("$table_name", Opt.DefaultTableName);
-
-
-        //  UPDATE table_name
-        //  SET column1 = value1, column2 = value2...., columnN = valueN
-        //  WHERE[condition];
         var sql = $@"
                      UPDATE {Opt.DefaultTableName}
-                        -- SET $Value_Column = $Value_Value,
-                           SET {Opt.ColumnPrefix + Opt.ValueColumnName} = $Value_Value,
+                        SET {Opt.ColumnPrefix + Opt.ValueColumnName} = $Value_Value,
                             {Opt.ColumnPrefix + Opt.UpdatedByColumnName} = $UpdatedBy_Value,
                             {Opt.ColumnPrefix + Opt.UpdatedOnColumnName} = unixepoch($UpdatedOn_Value)
                       WHERE {Opt.ColumnPrefix + Opt.KeyColumnName} = $Key_Value
-                        AND {Opt.ColumnPrefix + Opt.TypeValueColumnName} = $ValueType_Value;
+                        AND {Opt.ColumnPrefix + Opt.TypeColumnName} = $Type_Value;
 
                      INSERT OR IGNORE INTO {Opt.DefaultTableName}
                             ( {Opt.ColumnPrefix + Opt.KeyColumnName},
-                            {Opt.ColumnPrefix + Opt.TypeValueColumnName},
+                            {Opt.ColumnPrefix + Opt.TypeColumnName},
                             {Opt.ColumnPrefix + Opt.ValueColumnName},
                             {Opt.ColumnPrefix + Opt.CreateByColumnName},
                             {Opt.ColumnPrefix + Opt.CreateOnColumnName},
                             {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
                             {Opt.ColumnPrefix + Opt.UpdatedOnColumnName})
                     VALUES ($Key_Value,
-                            $ValueType_Value,
+                            $Type_Value,
                             $Value_Value,
                             $UpdatedBy_Value,
                             unixepoch($UpdatedOn_Value),
@@ -554,5 +508,62 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
 
         return cmd;
 
+    }
+    private SqliteCommand upcertCommand(string key, string valueType, string value, string User, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    {
+        var utcNow = DateTime.UtcNow;
+        var cmd = Db.CreateCommand();
+
+        cmd.Parameters.AddWithValue("$Key_Value", key);
+        cmd.Parameters.AddWithValue("$Type_Value", valueType);
+        cmd.Parameters.AddWithValue("$Value_Value", value);
+
+        cmd.Parameters.AddWithValue("$UpdatedBy_Value", User);
+        cmd.Parameters.AddWithValue("$UpdatedOn_Value", utcNow);
+
+        var sql = $@"
+            INSERT INTO {Opt.DefaultTableName} (
+                {Opt.ColumnPrefix + Opt.KeyColumnName},
+                {Opt.ColumnPrefix + Opt.TypeColumnName},
+                {Opt.ColumnPrefix + Opt.ValueColumnName},
+                {Opt.ColumnPrefix + Opt.CreateByColumnName},
+                {Opt.ColumnPrefix + Opt.CreateOnColumnName},
+                {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
+                {Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
+                ) VALUES (
+                $Key_Value,
+                $Type_Value,
+                $Value_Value,
+                $UpdatedBy_Value,
+                unixepoch($UpdatedOn_Value),
+                $UpdatedBy_Value,
+                unixepoch($UpdatedOn_Value)
+                )
+             ON CONFLICT({Opt.ColumnPrefix + Opt.KeyColumnName},{Opt.ColumnPrefix + Opt.TypeColumnName})
+                DO UPDATE SET
+                    {Opt.ColumnPrefix + Opt.ValueColumnName} = $Value_Value,
+                    {Opt.ColumnPrefix + Opt.UpdatedByColumnName} = $UpdatedBy_Value,
+                    {Opt.ColumnPrefix + Opt.UpdatedOnColumnName} = unixepoch($UpdatedOn_Value)
+                WHERE {Opt.ColumnPrefix + Opt.KeyColumnName} = $Key_Value
+                AND {Opt.ColumnPrefix + Opt.TypeColumnName} = $Type_Value;";
+
+        cmd.CommandText = sql;
+        Debug.WriteLine($"Upsert SQL: {sql}");
+
+        return cmd;
+    }
+
+    private SqliteCommand commandForClearAll(string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    {
+        var cmd = Db.CreateCommand();
+
+        cmd.Parameters.AddWithValue("$Type_Value", valueType);
+
+        var sql = $@"DELETE 
+                    FROM {Opt.DefaultTableName}
+                    WHERE {Opt.ColumnPrefix + Opt.TypeColumnName} = $Type_Value;";
+
+        cmd.CommandText = sql;
+        return cmd;
     }
 }
