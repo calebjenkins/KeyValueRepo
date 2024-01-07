@@ -7,7 +7,7 @@ public static class KeyValueSqliteOptionsExtensions
         return new List<string>()
         {
             Opt.ColumnPrefix + Opt.KeyColumnName,
-            Opt.ColumnPrefix + Opt.TypeValueColumnName,
+            Opt.ColumnPrefix + Opt.TypeColumnName,
             Opt.ColumnPrefix + Opt.ValueColumnName,
             Opt.ColumnPrefix + Opt.CreateByColumnName,
             Opt.ColumnPrefix + Opt.CreateOnColumnName,

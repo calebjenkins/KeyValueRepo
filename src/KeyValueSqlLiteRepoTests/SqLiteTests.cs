@@ -1,8 +1,8 @@
 ﻿
 using System.Diagnostics;
 
-
 namespace KeyValueSqlLiteRepoTests;
+
 
 [Collection ("RepoTests")]
 public class SqLiteTests : KeyValueBaseTests
@@ -10,10 +10,20 @@ public class SqLiteTests : KeyValueBaseTests
     ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
     ILogger<SchemaValidator> _schemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
     ITestOutputHelper _out;
+    IKeyValueRepo repo;
 
     public SqLiteTests(ITestOutputHelper output)
     {
         _out = output ?? throw new ArgumentNullException(nameof(output));
+        repo = GetNewRepo();
+    }
+
+    [Fact]
+    public async Task Dispose()
+    {
+        // clean up
+        await repo.AsKeyValueSqlLiteRepo().RemoveAll<Person>();
+        await repo.AsKeyValueSqlLiteRepo().RemoveAll<Location>();
     }
 
     public IKeyValueRepo GetNewRepo(string path)
