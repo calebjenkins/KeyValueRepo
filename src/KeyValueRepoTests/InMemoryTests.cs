@@ -71,7 +71,6 @@ public class InMemoryTests
 
         IKeyValueRepo repo = await getRepoWithRecords(people, TEST_Name);
 
-
         var results = await repo.GetMetaAll<Person>();
         results.Count.Should().BeGreaterThan(2);
     }
