@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;</TargetFrameworks>
 		<Configurations>Debug;Release;</Configurations>
@@ -7,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<RootNamespace>Calebs.Data.KeyValueRepo</RootNamespace>
 		<AssemblyName>Calebs.KeyValueRepo</AssemblyName>
-		<Version>0.4.0</Version>
+		<Version>0.5.0</Version>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<IsPackable>true</IsPackable>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>

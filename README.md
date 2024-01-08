@@ -35,23 +35,29 @@ The package `version` is defined in the `KeyValueRepo.csproj` file, using .NET S
 ## Methods in IKeyValueRepo
 
 - Get<T>(string Id)
-- Get<T>(int Id) => Get<T>(string Id)
-    - Note: This method has a _default implementation_ that performs a `ToString()` on the Id and calls the `Get<T>(string Id)` method.
 - GetAll<T>()
 - Update<T>(string Id, T object)
-- Update<T>(int Id, T object) => Update(string Id, T object)
-    - Note This method has a _default implementation_ that performs a `ToSTring()` on the int Id and calls the `Update<T>(string Id, T object)` method.
+- GetMeta<T>(string Id)
+- GetMetaAll<T>()
+- GetHistory<T>(string Id)
+- Remove<T>(string Id)
+- RemoveAll<T>()
 
+## Methods in included extension methods
+- Get<T>(int Id) => Get<T>(string Id)
+- Update<T>(int Id, T object) => Update(string Id, T object)
+- Remove<T>(int Id) => Remove<T>(string Id)
 
 ## Release History & Development Goals
 - 0.1.0 - initial release (in Memory)
 - 0.2.0 - added SqlLite Implementation
 - ✔ SQLite [Nuget Package](https://www.nuget.org/packages/Calebs.KeyValueRepo.SQLite/)
+- ✔ Base (InMemory) Unit Test [Nuget Package](https://www.nuget.org/packages/Calebs.KeyValueRepoTests/)
+- 0.3.0 - Added Meta Objects 
+- 0.4.0 - Completed SQLite Package with Meta Objects
+- 0.5.0 - Added: Remove<T>(id) and RemoveAll<T> to IKeyValueRepo
 ### Future Goals
 ---
-- In Progress: 0.3.0 - New Feature: KV Meta Objects
-- In Progress: Seperate and publish base unit tests
-- Considering: 0.4.0 - New Feature: Remove / RemoveAll methods
 - New Repo: Azure Tables Implementation
 - New Repo: Sql Server Implementation
 - New Repo: Azure CosmoDB Implementation
