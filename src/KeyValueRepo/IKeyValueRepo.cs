@@ -7,4 +7,6 @@ public interface IKeyValueRepo
     Task<MetaObject<T>?> GetMeta<T>(string key) where T : class;
     Task<IList<MetaObject<T>>> GetHistory<T>(string key) where T : class;
     Task<IList<MetaObject<T>>> GetMetaAll<T>() where T : class;
+    Task Remove<T>(string key) where T : class;
+    Task RemoveAll<T>() where T : class;
 }

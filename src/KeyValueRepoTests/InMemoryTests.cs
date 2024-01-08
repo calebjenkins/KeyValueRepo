@@ -1,5 +1,4 @@
 
-
 using System.Security.Principal;
 
 namespace Calebs.Data.KeyValueRepoTests;
@@ -12,13 +11,18 @@ public class InMemoryTests
         return new KeyValueInMemory();
     }
 
-    private async Task<IKeyValueRepo> getRepoWithRecords(Person p, string TestName)
+    internal string getRandomId()
+    {
+        return Guid.NewGuid().ToString().Substring(0, 8);
+    }
+
+    private async Task<IKeyValueRepo> getRepoWithRecords(Person p, string TestName = "TestName")
     {
         var people = new List<Person>() { p };
         return await getRepoWithRecords(people, TestName);
     }
 
-    private async Task<IKeyValueRepo> getRepoWithRecords(IList<Person> People, string TestName)
+    private async Task<IKeyValueRepo> getRepoWithRecords(IList<Person> People, string TestName = "TestName")
     {
         IKeyValueRepo repo = GetNewRepo();
 
@@ -46,6 +50,8 @@ public class InMemoryTests
         var result = await repo.GetMeta<Person>(p.Id);
         result?.CreatedBy.Should().Be(TEST_Name);
         result?.UpdatedBy.Should().Be(TEST_Name);
+        result?.CreatedOn.Should<DateTime>().NotBeNull();
+        result?.UpdatedOn.Should<DateTime>().NotBeNull();
 
         result?.Value?.Last.Should().Be(p.Last);
         result?.Value?.First.Should().Be(p.First);
@@ -79,11 +85,14 @@ public class InMemoryTests
         IKeyValueRepo repo = await getRepoWithRecords(p, TEST_Name);
 
         var results = await repo.GetHistory<Person>(p.Id);
+
         results?.Count.Should().BeGreaterThan(0);
         results?.First()?.Value?.First.Should().Be(p.First);
         results?.First()?.Value?.Last.Should().Be(p.Last);
         results?.First()?.CreatedBy.Should().Be(TEST_Name);
+        results?.First()?.CreatedOn.Should<DateTime>().NotBeNull();
         results?.First()?.UpdatedBy.Should().Be(TEST_Name);
+        results?.First()?.UpdatedOn.Should<DateTime>().NotBeNull();
     }
 
     [Fact]
@@ -223,6 +232,106 @@ public class InMemoryTests
 
         people.Count().Should().BeGreaterThanOrEqualTo(4);
         locals.Count().Should().BeGreaterThanOrEqualTo(2);
+    }
+
+    [Fact]
+    public async Task Remove_ShouldRemoveOnlySpecifiedRecord()
+    {
+        var p1 = new Person("Kelly", "Burkhardt", 1);
+        var p2 = new Person("Drew", "Wu", 2);
+        var p3 = new Person("Monroe", "", 3);
+        var people = new List<Person>() { p1, p2, p3 };
+        var TEST_USER = "test name";
+        var repo = await getRepoWithRecords(people, TEST_USER);
+
+        var allPeople = await repo.GetAll<Person>();
+
+        var peopleCount = allPeople.Count();
+        peopleCount.Should().BeGreaterThan(2);
+        var drew = await repo.Get<Person>(p2.Id);
+        drew.Should().NotBeNull();
+
+        await repo.Remove<Person>(p2.Id);
+        var nullDrew = await repo.Get<Person>(p2.Id);
+        nullDrew.Should().BeNull();
+
+        allPeople = await repo.GetAll<Person>();
+        allPeople.Count.Should().Be(peopleCount - 1);
+    }
+
+    [Fact]
+    public async Task Remove_MissingIdShouldNotThrowAnError()
+    {
+        var p1 = new Person("Kelly", "Burkhardt", 1);
+        var p2 = new Person("Drew", "Wu", 2);
+        var p3 = new Person("Monroe", "", 3);
+        var people = new List<Person>() { p1, p2, p3 };
+        var repo = await getRepoWithRecords(people);
+
+        try {
+            await repo.Remove<Person>(4);
+            true.Should().BeTrue();
+        } 
+        catch (Exception ex) {
+            ex.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public async Task RemoveAll_ShouldRemoveAllSpecifiedTypes()
+    {
+        var repo = GetNewRepo();
+
+        await repo.Update(1, new Person("Kelly", "Burkhardt", 1));
+        await repo.Update("1", new Location("1", "123 Main", "Portland"));
+        await repo.Update("2", new Location("2", "123 Main", "Fort Worth"));
+        await repo.Update(2, new Person("Drew", "Wu", 2));
+        await repo.Update(3, new Person("Monroe", "", 3));
+        await repo.Update("3", new Location("3", "123 Main", "Dallas"));
+        await repo.Update("4", new Location("4", "123 Main Street", "Salem"));
+
+        var people = await repo.GetAll<Person>();
+        people.Count.Should().BeGreaterThan(2);
+
+        var places = await repo.GetAll<Location>();
+        places.Count.Should().BeGreaterThan(3);
+
+        await repo.RemoveAll<Person>();
+
+        people = await repo.GetAll<Person>();
+        people.Count.Should().Be(0);
+
+        places = await repo.GetAll<Location>();
+        places.Count.Should().BeGreaterThan(3);
+    }
+
+    [Fact]
+    public async Task RemoveAll_MissingTypeShouldNotThrowAnError()
+    {
+        var repo = GetNewRepo();
+
+        await repo.Update(1, new Person("Kelly", "Burkhardt", 1));
+        await repo.Update("1", new Location("1", "123 Main", "Portland"));
+        await repo.Update("2", new Location("2", "123 Main", "Fort Worth"));
+        await repo.Update(2, new Person("Drew", "Wu", 2));
+        await repo.Update(3, new Person("Monroe", "", 3));
+        await repo.Update("3", new Location("3", "123 Main", "Dallas"));
+        await repo.Update("4", new Location("4", "123 Main Street", "Salem"));
+
+        var people = await repo.GetAll<Person>();
+        people.Count.Should().BeGreaterThan(2);
+
+        var places = await repo.GetAll<Location>();
+        places.Count.Should().BeGreaterThan(3);
+
+        try
+        {
+            await repo.RemoveAll<UnusedType>();
+            true.Should().BeTrue();
+        } catch (Exception ex)
+        {
+            ex.Should().BeNull();
+        }
     }
 }
 
