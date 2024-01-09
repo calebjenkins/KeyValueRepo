@@ -267,8 +267,10 @@ public class InMemoryTests
         var people = new List<Person>() { p1, p2, p3 };
         var repo = await getRepoWithRecords(people);
 
+        var randomId = getRandomId();
+
         try {
-            await repo.Remove<Person>(4);
+            await repo.Remove<Person>(randomId);
             true.Should().BeTrue();
         } 
         catch (Exception ex) {

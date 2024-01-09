@@ -1,5 +1,6 @@
 ﻿
 using System.Diagnostics;
+using System.Security.Principal;
 
 namespace KeyValueSqlLiteRepoTests;
 
@@ -15,15 +16,23 @@ public class SqLiteTests : KeyValueBaseTests
     public SqLiteTests(ITestOutputHelper output)
     {
         _out = output ?? throw new ArgumentNullException(nameof(output));
+
+        var TEST_Name = "test name";
+        IIdentity ident = new GenericIdentity(TEST_Name);
+        IPrincipal princ = new GenericPrincipal(ident, null);
+        Thread.CurrentPrincipal = princ;
+
         repo = GetNewRepo();
+
     }
 
     [Fact]
-    public async Task Dispose()
+    public override async Task Dispose()
     {
         // clean up
         await repo.AsKeyValueSqlLiteRepo().RemoveAll<Person>();
         await repo.AsKeyValueSqlLiteRepo().RemoveAll<Location>();
+        await base.Dispose();
     }
 
     public IKeyValueRepo GetNewRepo(string path)

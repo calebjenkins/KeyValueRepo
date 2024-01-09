@@ -30,7 +30,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Calebs.Extensions" Version="1.5.0" />
-		<PackageReference Include="Calebs.KeyValueRepo" Version="0.4.0-ci-37" />
+		<PackageReference Include="Calebs.KeyValueRepo" Version="0.5.0-ci-43" />
 		<PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
 		<None Include="..\..\LICENSE">

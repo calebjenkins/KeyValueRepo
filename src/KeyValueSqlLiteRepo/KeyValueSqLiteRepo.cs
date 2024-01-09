@@ -129,24 +129,38 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
     {
         return await selectAllMetaRecords<T>();
     }
-    public async Task<bool> RemoveAll<T>() where T : class
+
+    public async Task Remove<T>(string key) where T : class
     {
         var valueType = typeof(T).ToString();
         try
         {
             _db.ConfirmOpen();
-            var command = commandForClearAll(valueType, _db, _options);
+            var command = commandForRemoveOne(valueType, key, _db, _options);
             var result = await command.ExecuteNonQueryAsync();
-            return true;
+            _logger.LogDebug($"RemoveOne completed for type:{valueType} and Key:{key}");
         }
         catch (SqliteException ex)
         {
-            _logger.LogError("Error validating Default Table: {0}", ex.Message);
-            return false;
+            _logger.LogError("Error on RemoveOne: {0}", ex.Message);
         }
-
     }
 
+    public async Task RemoveAll<T>() where T : class
+    {
+        var valueType = typeof(T).ToString();
+        try
+        {
+            _db.ConfirmOpen();
+            var command = commandForRemoveAll(valueType, _db, _options);
+            var result = await command.ExecuteNonQueryAsync();
+            _logger.LogDebug("RemoveAll completed");
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError("Error on RemoveAll: {0}", ex.Message);
+        }
+    }
     public async Task Update<T>(string key, T value) where T : class
     {
         var valueType = typeof(T).ToString();
@@ -553,7 +567,23 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         return cmd;
     }
 
-    private SqliteCommand commandForClearAll(string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    private SqliteCommand commandForRemoveOne(string valueType, string Id, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
+    {
+        var cmd = Db.CreateCommand();
+
+        cmd.Parameters.AddWithValue("$Type_Value", valueType);
+        cmd.Parameters.AddWithValue("$Key_Value", Id);
+
+        var sql = $@"DELETE 
+                    FROM {Opt.DefaultTableName}
+                    WHERE {Opt.ColumnPrefix + Opt.TypeColumnName} = $Type_Value
+                      AND {Opt.ColumnPrefix + Opt.KeyColumnName} = $Key_Value; ";
+
+        cmd.CommandText = sql;
+        return cmd;
+    }
+
+    private SqliteCommand commandForRemoveAll(string valueType, SqliteConnection Db, KeyValueSqlLiteOptions Opt)
     {
         var cmd = Db.CreateCommand();
 
