@@ -8,8 +8,8 @@ public class SQLiteBenchmarks : BaseBenchmarks
     public void SetUpSQLiteBenchmarks()
     {
         var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
-        var vLogger = new Mock<ILogger<SchemaValidator>>().Object;
-        var kvLogger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
+        var vLogger = Substitute.For<ILogger<SchemaValidator>>();
+        var kvLogger = Substitute.For<ILogger<KeyValueSqLiteRepo>>();
         var validator = new SchemaValidator(vLogger);
 
          Repo = new KeyValueSqLiteRepo(kvLogger, validator, opt);

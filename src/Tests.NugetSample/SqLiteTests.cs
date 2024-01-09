@@ -5,8 +5,8 @@ namespace KeyValueRepoTests;
 [Collection ("RepoTests")]
 public class SqLiteTests : InMemeoryTests
 {
-    ILogger<KeyValueSqLiteRepo> _logger = new Mock<ILogger<KeyValueSqLiteRepo>>().Object;
-    ILogger<SchemaValidator> _schemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
+    ILogger<KeyValueSqLiteRepo> _logger = Substitute.For<ILogger<KeyValueSqLiteRepo>>();
+    ILogger<SchemaValidator> _schemaLogger = Substitute.For<ILogger<SchemaValidator>>();
     ITestOutputHelper _out;
 
     public SqLiteTests(ITestOutputHelper output)
@@ -97,7 +97,7 @@ public class SqLiteTests : InMemeoryTests
         var opt = new KeyValueSqlLiteOptions() { ColumnPrefix = "col" };
         var defaultTableName = opt.DefaultTableName;
 
-        ILogger<SchemaValidator> _SchemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
+        ILogger<SchemaValidator> _SchemaLogger = Substitute.For<ILogger<SchemaValidator>>();
 
         var verify = new SchemaValidator(_SchemaLogger);
         bool exist = await verify.TablesExists(defaultTableName, db.AsKeyValueSqlLiteRepo().DbConn);

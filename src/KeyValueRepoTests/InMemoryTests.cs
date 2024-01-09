@@ -6,6 +6,15 @@ namespace Calebs.Data.KeyValueRepoTests;
 [Collection("RepoTests")]
 public class InMemoryTests
 {
+    [Fact]
+    public virtual async Task Dispose()
+    {
+        var repo = GetNewRepo();
+        // clean up
+        await repo.RemoveAll<Person>();
+        await repo.RemoveAll<Location>();
+    }
+
     public virtual IKeyValueRepo GetNewRepo()
     {
         return new KeyValueInMemory();
@@ -16,6 +25,13 @@ public class InMemoryTests
         return Guid.NewGuid().ToString().Substring(0, 8);
     }
 
+    internal void ApplyNameToThread(string UserName)
+    {
+        IIdentity ident = new GenericIdentity(UserName);
+        IPrincipal princ = new GenericPrincipal(ident, null);
+        Thread.CurrentPrincipal = princ;
+    }
+
     private async Task<IKeyValueRepo> getRepoWithRecords(Person p, string TestName = "TestName")
     {
         var people = new List<Person>() { p };
@@ -24,13 +40,9 @@ public class InMemoryTests
 
     private async Task<IKeyValueRepo> getRepoWithRecords(IList<Person> People, string TestName = "TestName")
     {
+        ApplyNameToThread(TestName);
+
         IKeyValueRepo repo = GetNewRepo();
-
-        var TEST_Name = TestName;
-        IIdentity ident = new GenericIdentity(TEST_Name);
-        IPrincipal princ = new GenericPrincipal(ident, null);
-        Thread.CurrentPrincipal = princ;
-
         foreach (Person p in People)
         {
             await repo.Update(p.Id, p);
@@ -254,8 +266,13 @@ public class InMemoryTests
         var nullDrew = await repo.Get<Person>(p2.Id);
         nullDrew.Should().BeNull();
 
-        allPeople = await repo.GetAll<Person>();
-        allPeople.Count.Should().Be(peopleCount - 1);
+        var newP1 = await repo.Get<Person>(p1.Id);
+        newP1.Should().NotBeNull();
+        newP1.Should().BeEquivalentTo(p1);
+
+        var newP3 = await repo.Get<Person>(p3.Id);
+        newP3.Should().NotBeNull();
+        newP3.Should().BeEquivalentTo(p3);
     }
 
     [Fact]
@@ -267,13 +284,13 @@ public class InMemoryTests
         var people = new List<Person>() { p1, p2, p3 };
         var repo = await getRepoWithRecords(people);
 
-        var randomId = getRandomId();
-
-        try {
-            await repo.Remove<Person>(randomId);
+        try
+        {
+            await repo.Remove<Person>(4);
             true.Should().BeTrue();
-        } 
-        catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             ex.Should().BeNull();
         }
     }
@@ -329,7 +346,8 @@ public class InMemoryTests
         {
             await repo.RemoveAll<UnusedType>();
             true.Should().BeTrue();
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             ex.Should().BeNull();
         }
