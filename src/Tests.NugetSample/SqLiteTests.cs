@@ -14,6 +14,12 @@ public class SqLiteTests : InMemeoryTests
         _out = output ?? throw new ArgumentNullException(nameof(output));
     }
 
+    public IKeyValueRepo GetNewRepo(KeyValueSqlLiteOptions options)
+    {
+        var validator = new SchemaValidator(_schemaLogger);
+        return new KeyValueSqLiteRepo(_logger, validator, options);
+    }
+
     public IKeyValueRepo GetNewRepo(string path)
     {
         var opt = new KeyValueSqlLiteOptions()
@@ -21,8 +27,8 @@ public class SqLiteTests : InMemeoryTests
             ConnectionString = path,
             ColumnPrefix = "col"
         };
-        var validator = new SchemaValidator(_schemaLogger);
-        return new KeyValueSqLiteRepo(_logger, validator, opt);
+
+        return GetNewRepo(opt);
     }
     public override IKeyValueRepo GetNewRepo()
     {
@@ -116,4 +122,5 @@ public class SqLiteTests : InMemeoryTests
         // Reset DB
         await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
     }
+
 }

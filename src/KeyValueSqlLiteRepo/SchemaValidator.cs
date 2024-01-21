@@ -10,6 +10,60 @@ public class SchemaValidator
         _logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
     }
 
+    public async Task<(bool HasError, IList<string> Messages)> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
+    {
+        bool hasErrors = false;
+        IList<string> results = new List<string>();
+
+        try
+        {
+            DbConnection.ConfirmOpen();
+
+            // Check Existance of All Tables
+            foreach (var table in Options.AllTables())
+            {
+                var table_exists = await TablesExists(table, DbConnection);
+                if (!table_exists)
+                {
+                    // if (Options.CreateTableIfMissing) // We always do this. 
+                    results.Add($"Table {table} is missing.. attempting to add");
+
+                    var created = await CreateTable(table, Options, DbConnection);
+                    table_exists = await TablesExists(table, DbConnection);
+
+                    if (!table_exists)
+                    {
+                        hasErrors = true;
+                        results.Add($"Tried to create table {table} did not work.");
+                    }
+                    else
+                    {
+                        results.Add($"Succesfully created table {table}");
+                    }
+                }
+
+                var validationResult = await ValidateTableSchema(table, Options, DbConnection);
+                if (validationResult.HasError)
+                {
+                    hasErrors = true;
+                }
+
+                results.AddRange(validationResult.Messages);
+            }
+            return (hasErrors, results);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error validating Schema - {ex.Message}");
+            return (true, results);
+        }
+        finally
+        {
+            await DbConnection.CloseAsync();
+        }
+    }
+
     public async Task<bool> TablesExists(string TableName, SqliteConnection DbConnection)
     {
         DbConnection.ConfirmOpen();
@@ -44,7 +98,6 @@ public class SchemaValidator
             throw;
         }
     }
-
     public async Task<bool> CreateAllTables(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
     {
         var TotalResult = await CreateTable(Options.DefaultTableName, Options, DbConnection);
@@ -73,94 +126,59 @@ public class SchemaValidator
         }
     }
 
-    public async Task<(bool HasError, IList<string> Messages)> ValidateSchema(KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
-    {
-        bool hasErrors = false;
-        IList<string> results = new List<string>();
-
-        try
-        {
-            DbConnection.ConfirmOpen();
-
-            // Check Existance of All Tables
-            foreach (var table in Options.AllTables())
-            {
-                var table_exists = await TablesExists(table, DbConnection);
-                if (!table_exists)
-                {
-                    // if (Options.CreateTableIfMissing) // We always do this. 
-                    results.Add($"Table {table} is missing.. attempting to add");
-
-                    var created = await CreateTable(table, Options, DbConnection);
-                    table_exists = await TablesExists(table, DbConnection);
-
-                    if (!table_exists)
-                    {
-                        hasErrors = true;
-                        results.Add($"Tried to create table {table} did not work.");
-                    }
-                    else
-                    {
-                        results.Add($"Succesfully created table {table}");
-                    }
-                }
-
-                var validationResult = await ValidateTableSchema(table, Options, DbConnection);
-                if(validationResult.HasError)
-                {
-                    hasErrors = true;
-                }
-
-                results.AddRange(validationResult.Messages);
-            }
-            return (hasErrors, results);
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Error validating Schema - {ex.Message}");
-            return (true, results);
-        }
-        finally
-        {
-            await DbConnection.CloseAsync();
-        }
-    }
-
     private async Task<(bool HasError, IList<string> Messages)> ValidateTableSchema(string TableName, KeyValueSqlLiteOptions Options, SqliteConnection DbConnection)
     {
         bool hasErrors = false;
         IList<string> results = new List<string>();
 
-        var sql = $@"SELECT * FROM sqlite_schema";
+        var sqlSqliteSchema = $@"SELECT * FROM sqlite_schema";
 
         try
         {
             using var connection = DbConnection;
             connection.Open();
 
-            var command = connection.CreateCommand();
-            command.CommandText = sql;
+            // Check Table
+            var schemaCommand = connection.CreateCommand();
+            schemaCommand.CommandText = sqlSqliteSchema;
+            using var schemaReader = await schemaCommand.ExecuteReaderAsync();
 
-            using var reader = await command.ExecuteReaderAsync();
-            while (reader.Read())
+            while (schemaReader.Read())
             {
-                var col1 = reader.GetString(0);
-                var tableSql = reader.GetString(4);
-                // Pause for effect.
+                var col1 = schemaReader.GetString(0);
+                var tableSql = schemaReader.GetString(4);
                 var columns = Options.AllColumnsWithPrefix();
 
                 foreach (var c in columns)
                 {
-                    var result = CheckString(tableSql, c);
-                    if (result.Missing && hasErrors == false)
+                    var result = CheckSourceForSearchString(tableSql, c);
+                    if (result.IsMissing && hasErrors == false)
                     {
                         hasErrors = true;
                     }
 
                     results.Add(result.Message);
                 }
-            }
+
+                // Check Support for History (PK or no PK)
+                // WITHOUT ROWID = PK = No History
+                // No PK = ROWID = With History
+                var track = (Options.TrackHistory) ? "" : "not ";
+                var pkMsg = $"KeyValueRepo is { track }configured to Track History";
+
+                var DesignedForHistory = CheckSourceForSearchString(tableSql, "WITHOUT ROWID");
+                var designForHistoryNot = (DesignedForHistory.IsMissing)? "not " : "";
+                var designMsg = (DesignedForHistory.IsMissing)?
+                    "There are no PrimaryKeys and instead it it using Sqlite's ROWID Feature - TrackHistory should be true."
+                    : "It has a composite Primary Key and was create WITHOUT ROWID - TrackHistory should be false.";
+
+                if (DesignedForHistory.IsMissing != Options.TrackHistory)
+                {
+                    results.Add($"Error: History Tracking Mismatch. {pkMsg}, but {designMsg}. Try changing the configuration so that TrackHistory is false or Delete this table andre-initialize with TrackHistory set to true.");
+                    hasErrors = true;
+                }
+            }            
+
         }
         catch (Exception ex)
         {
@@ -175,7 +193,7 @@ public class SchemaValidator
         return (hasErrors, results);
     }
 
-    private (bool Missing, string Message) CheckString(string SourceText, string SearchString)
+    private static (bool IsMissing, string Message) CheckSourceForSearchString(string SourceText, string SearchString)
     {
         bool notFound = !SourceText.Contains(SearchString, StringComparison.OrdinalIgnoreCase);
         string foundText = (notFound) ? "not " : string.Empty;

@@ -29,7 +29,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Calebs.Extensions" Version="1.5.0" />
+		<PackageReference Include="Calebs.Extensions" Version="1.6.0-ci-67" />
 		<None Include="..\..\assets\logo\KeyValueRepoLogo.png">
       		<Pack>True</Pack>
       		<PackagePath></PackagePath>

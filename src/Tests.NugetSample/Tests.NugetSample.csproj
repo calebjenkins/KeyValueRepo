@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Calebs.Extensions" Version="1.5.0" />
+    <PackageReference Include="Calebs.Extensions" Version="1.6.0-ci-67" />
     <PackageReference Include="Calebs.KeyValueRepo.SQLite" Version="0.5.0-ci-43" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />

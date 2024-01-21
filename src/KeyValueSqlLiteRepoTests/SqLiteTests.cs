@@ -35,6 +35,12 @@ public class SqLiteTests : KeyValueBaseTests
         await base.Dispose();
     }
 
+    public IKeyValueRepo GetNewRepo(KeyValueSqlLiteOptions options)
+    {
+        var validator = new SchemaValidator(_schemaLogger);
+        return new KeyValueSqLiteRepo(_logger, validator, options);
+    }
+
     public IKeyValueRepo GetNewRepo(string path)
     {
         var opt = new KeyValueSqlLiteOptions()
@@ -42,8 +48,8 @@ public class SqLiteTests : KeyValueBaseTests
             ConnectionString = path,
             ColumnPrefix = "col"
         };
-        var validator = new SchemaValidator(_schemaLogger);
-        return new KeyValueSqLiteRepo(_logger, validator, opt);
+
+        return GetNewRepo(opt);
     }
     public override IKeyValueRepo GetNewRepo()
     {
@@ -136,5 +142,133 @@ public class SqLiteTests : KeyValueBaseTests
 
         // Reset DB
         await removeDbFileIfExists(db.AsKeyValueSqlLiteRepo());
+    }
+
+    [Fact]
+    public void GetHistory_ShouldReturnOneItemWhenHistoryFalse()
+    {
+
+    }
+
+    [Fact]
+    public async Task GetHistory_ShouldReturnAllHistoryWhenHistoryTrue()
+    {
+        var rnd = getRandomId();
+
+        var opt = new KeyValueSqlLiteOptions()
+        {
+            ConnectionString = $"Data Source=./{rnd}_WithHistory.db",
+            TrackHistory = true,
+            ValidateSchemaOnStartUp = true
+        };
+        IKeyValueRepo db = GetNewRepo(opt);
+
+        await db.Update<Person>(1, new Person("Test", "Test_First", 1));
+        await db.Update<Person>(1, new Person("Test", "Test_Second", 1));
+        await db.Update<Person>(1, new Person("Test", "Test_Last", 1));
+
+        var p1 = await db.Get<Person>(1);
+        p1?.Should().NotBeNull();
+        p1?.First.Should().Be("Test");
+
+        var pHist = await db.GetHistory<Person>(1);
+        pHist?.Count.Should().Be(3);
+
+        var path = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
+        await db.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
+
+        File.Delete(path);
+    }
+
+    [Fact]
+    public async Task Validator_TrackHistory_ShouldThrowErrorIfNotConfiguredForTrackHistory()
+    {
+        var rnd = getRandomId();
+        var connString = $"Data Source=./{rnd}_WithHistory.db";
+        var expectedError = false;
+
+        var opt = new KeyValueSqlLiteOptions()
+        {
+            ConnectionString = connString,
+            TrackHistory = true,
+            ValidateSchemaOnStartUp = true
+        };
+        IKeyValueRepo dbWithTrackHistory = GetNewRepo(opt);
+        dbWithTrackHistory.Should().NotBeNull();
+
+        opt.TrackHistory = false; // mismatch
+        IKeyValueRepo? dbWithNoTrackHistory = null;
+
+        try
+        {
+            dbWithNoTrackHistory = GetNewRepo(opt);
+        }
+        catch(InvalidOperationException ex)
+        {
+            Assert.True(ex != null, "Expected Error - forced mismatch error");
+            expectedError = true;
+        }
+        catch (Exception ex)
+        {
+            Assert.False(ex != null, "Should not be here - unexpected exception");
+        }
+        finally
+        {
+            if(dbWithNoTrackHistory != null)
+                await dbWithNoTrackHistory.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
+        }
+
+        var path = dbWithTrackHistory.AsKeyValueSqlLiteRepo().DatabaseFileName;
+        await dbWithTrackHistory.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
+        
+        File.Delete(path);
+
+        Assert.True(expectedError);
+    }
+
+    [Fact]
+    public async Task Validator_TrackHistoryFalse_ShouldThrowErrorIfConfiguredForTrackHistory()
+    {
+        var rnd = getRandomId();
+        var connString = $"Data Source=./{rnd}_WithHistory.db";
+        var expectedError = false;
+
+        var opt = new KeyValueSqlLiteOptions()
+        {
+            ConnectionString = connString,
+            TrackHistory = false,
+            ValidateSchemaOnStartUp = true
+        };
+        IKeyValueRepo dbWithNotTrackHistory = GetNewRepo(opt);
+        dbWithNotTrackHistory.Should().NotBeNull();
+
+        opt.TrackHistory = true; // mismatch
+        IKeyValueRepo? dbWithTrackHistory = null;
+
+        try
+        {
+            dbWithTrackHistory = GetNewRepo(opt);
+        }
+        catch (InvalidOperationException ex)
+        {
+            Assert.True(ex != null, "Expected Error - forced mismatch error");
+            expectedError = true;
+        }
+        catch (Exception ex)
+        {
+            Assert.False(ex != null, "Should not be here - unexpected exception");
+        }
+        finally
+        {
+            if (dbWithTrackHistory != null)
+                await dbWithTrackHistory.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
+        }
+
+        var path = dbWithNotTrackHistory.AsKeyValueSqlLiteRepo().DatabaseFileName;
+        await dbWithNotTrackHistory.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
+
+        File.Delete(path);
+
+        Assert.True(expectedError);
     }
 }

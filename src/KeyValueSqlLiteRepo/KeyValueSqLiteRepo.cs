@@ -29,6 +29,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
             if (!isValid)
             {
                 _logger.LogError( $"KeyValueRepo ({_options.DefaultTableName}) schema could not be validated - please see log for additional information." );
+                throw new InvalidOperationException("Table validation failed - please check logs");
             }
         }
     }
@@ -449,7 +450,7 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
         var cmd = Db.CreateCommand();
 
         cmd.Parameters.AddWithValue("$Key_Value", key);
-        cmd.Parameters.AddWithValue("$ValueType_Value", valueType);
+        cmd.Parameters.AddWithValue("$Type_Value", valueType);
         cmd.Parameters.AddWithValue("$Value_Value", value);
 
         cmd.Parameters.AddWithValue("$CreatedBy_Value", User);
@@ -461,14 +462,14 @@ public class KeyValueSqLiteRepo : IKeyValueRepo
                    (
                     {Opt.ColumnPrefix + Opt.KeyColumnName},
                     {Opt.ColumnPrefix + Opt.TypeColumnName},
-                    {Opt.ColumnPrefix + Opt.TypeColumnName},
+                    {Opt.ColumnPrefix + Opt.ValueColumnName},
                     {Opt.ColumnPrefix + Opt.CreateByColumnName},
                     {Opt.ColumnPrefix + Opt.CreateOnColumnName},
                     {Opt.ColumnPrefix + Opt.UpdatedByColumnName},
                     {Opt.ColumnPrefix + Opt.UpdatedOnColumnName}
                    ) VALUES (
                      $Key_Value,
-                     $ValueType_Value,
+                     $Type_Value,
                      $Value_Value,
                      $CreatedBy_Value,
                      unixepoch($CreatedOn_Value),
