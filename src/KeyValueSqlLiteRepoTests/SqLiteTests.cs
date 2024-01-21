@@ -12,12 +12,13 @@ public class SqLiteTests : KeyValueBaseTests
     ILogger<SchemaValidator> _schemaLogger = new Mock<ILogger<SchemaValidator>>().Object;
     ITestOutputHelper _out;
     IKeyValueRepo repo;
+    const string TEST_Name = "test name";
 
     public SqLiteTests(ITestOutputHelper output)
     {
         _out = output ?? throw new ArgumentNullException(nameof(output));
 
-        var TEST_Name = "test name";
+        
         IIdentity ident = new GenericIdentity(TEST_Name);
         IPrincipal princ = new GenericPrincipal(ident, null);
         Thread.CurrentPrincipal = princ;
@@ -151,7 +152,7 @@ public class SqLiteTests : KeyValueBaseTests
     }
 
     [Fact]
-    public async Task GetHistory_ShouldReturnAllHistoryWhenHistoryTrue()
+    public async Task GetHistory_ShouldReturnAll_WhenTrackHistoryIsTrue()
     {
         var rnd = getRandomId();
 
@@ -163,16 +164,56 @@ public class SqLiteTests : KeyValueBaseTests
         };
         IKeyValueRepo db = GetNewRepo(opt);
 
-        await db.Update<Person>(1, new Person("Test", "Test_First", 1));
-        await db.Update<Person>(1, new Person("Test", "Test_Second", 1));
-        await db.Update<Person>(1, new Person("Test", "Test_Last", 1));
+        await db.Update(1, new Person("Test", "Test_First", 1));
+        await db.Update(1, new Person("Test", "Test_Second", 1));
+        await db.Update(1, new Person("Test", "Test_Last", 1));
 
         var p1 = await db.Get<Person>(1);
         p1?.Should().NotBeNull();
         p1?.First.Should().Be("Test");
+        p1?.Last.Should().Be("Test_Last");
 
         var pHist = await db.GetHistory<Person>(1);
         pHist?.Count.Should().Be(3);
+
+        var pMeta = await db.GetMeta<Person>(1);
+        pMeta?.CreatedBy.Should().Be(TEST_Name);
+        pMeta?.UpdatedBy.Should().Be(TEST_Name);
+
+        var path = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
+        await db.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
+
+        File.Delete(path);
+    }
+
+    [Fact]
+    public async Task GetHistory_ShouldReturnOne_WhenTrackHistoryIsFalse()
+    {
+        var rnd = getRandomId();
+
+        var opt = new KeyValueSqlLiteOptions()
+        {
+            ConnectionString = $"Data Source=./{rnd}_WithHistory.db",
+            TrackHistory = false,
+            ValidateSchemaOnStartUp = true
+        };
+        IKeyValueRepo db = GetNewRepo(opt);
+
+        await db.Update(1, new Person("Test", "Test_First", 1));
+        await db.Update(1, new Person("Test", "Test_Second", 1));
+        await db.Update(1, new Person("Test", "Test_Last", 1));
+
+        var p1 = await db.Get<Person>(1);
+        p1?.Should().NotBeNull();
+        p1?.First.Should().Be("Test");
+        p1?.Last.Should().Be("Test_Last");
+
+        var pHist = await db.GetHistory<Person>(1);
+        pHist?.Count.Should().Be(1);
+
+        var pMeta = await db.GetMeta<Person>(1);
+        pMeta?.CreatedBy.Should().Be(TEST_Name);
+        pMeta?.UpdatedBy.Should().Be(TEST_Name);
 
         var path = db.AsKeyValueSqlLiteRepo().DatabaseFileName;
         await db.AsKeyValueSqlLiteRepo().ReleaseForCleanUp();
